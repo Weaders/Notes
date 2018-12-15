@@ -6,6 +6,6 @@
   },
   "AllowedHosts": "*",
   "ConnectionStrings": {
-    "DefaultConnection": "Server=DESKTOP-75GKBB7;Database=notes;User Id=root;Password=qweasd123;"
+    "DefaultConnection": "Server=localhost;Database=<db>;User Id=<user_id>;Password=<password>;"
   }
 }
