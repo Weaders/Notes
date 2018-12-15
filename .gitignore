@@ -8,3 +8,4 @@ bin
 *.min.css
 **/assets/*.js
 **/assets/*.js.map
+NotesMVC/appsettings.json
