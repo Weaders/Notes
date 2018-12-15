@@ -1,0 +1,10 @@
+*.vs
+*.vscode
+node_modules
+NotesMVC/.vs
+NotesMVC/.vscode
+obj
+bin
+*.min.css
+**/assets/*.js
+**/assets/*.js.map

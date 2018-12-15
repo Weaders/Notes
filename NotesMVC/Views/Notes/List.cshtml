@@ -1,0 +1,42 @@
+﻿@model NotesMVC.ViewModels.NoteForOutput[]
+
+@{
+    ViewData["Title"] = "List";
+}
+
+<h2>Notes list</h2>
+
+<table>
+    <thead>
+    <th>
+        Id
+    </th>
+    <th>
+        Title
+    </th>
+    <th>
+        Text
+    </th>
+    </thead>
+    <tbody>
+        @foreach (var note in Model) {
+
+            @if (note == null) {
+                continue;
+            }
+            
+            <tr>
+                <td>
+                    @note.Id
+                </td>
+                <td>
+                    @note.Title
+                </td>
+                <td>
+                    @note.Text
+                </td>
+            </tr>
+
+        }
+    </tbody>
+</table>

@@ -1,0 +1,39 @@
+﻿.user-form {
+    margin-top: 20px;
+}
+.user-form .user-form-buttons .btn {
+    margin-left: 10px;
+}
+.user-form .user-form-buttons .btn:first-child {
+    margin-left: 0px;
+}
+.note-add {
+    margin-top: 20px;
+    border-top: 1px solid #d0caca;
+    padding-top: 10px;
+}
+.note-list {
+    margin-top: 10px;
+}
+.note-list .note-line {
+    border-radius: 0;
+}
+
+.note-list .note-line.expanded .btn {
+    border-bottom: 1px solid rgba(0,0,0,.125)
+}
+.note-header-btns .btn-title {
+    width: 93%;
+    text-align: left;
+    background-color: rgba(0,0,0,.03);
+    border-right: 1px solid #e2e2e2;
+    z-index: 1;
+}
+.note-header-btns .btn-edit,
+.note-header-btns .btn-remove {
+    background-color: white;
+    border-radius: 0;
+}
+.note-header-btns .btn-remove {
+    border-left: 1px solid rgba(0,0,0,.125)
+}
