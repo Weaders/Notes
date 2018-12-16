@@ -1,18 +1,18 @@
-FROM microsoft/dotnet:2.1-aspnetcore-runtime AS base
-WORKDIR /app
+FROM microsoft/dotnet:2.1-sdk
+
 EXPOSE 80
 EXPOSE 443
-EXPOSE 5000
 
-FROM microsoft/dotnet:2.1-sdk AS build
 WORKDIR /src
-COPY ["NotesMVC/NotesMVC.csproj", "NotesMVC/"]
+COPY ["NotesMVC.csproj", "NotesMVC/"]
 RUN dotnet restore "NotesMVC/NotesMVC.csproj"
-COPY . .
-WORKDIR "/src/NotesMVC"
+COPY . NotesMVC
+WORKDIR /src/NotesMVC
+
 RUN dotnet build "NotesMVC.csproj" -c Release -o /app
 
-FROM build AS publish
+COPY entrypoint.sh /app
+
 RUN dotnet publish "NotesMVC.csproj" -c Release -o /app
 
 RUN apt update
@@ -26,10 +26,9 @@ RUN apt-get install -y nodejs
 RUN node -v
 RUN npm -v
 
+#Install npm dependices
 RUN npm i
 
-FROM base AS final
 WORKDIR /app
-COPY --from=publish /app .
 
-ENTRYPOINT ["dotnet", "NotesMVC.dll"]
+ENTRYPOINT ["bash", "entrypoint.sh"]

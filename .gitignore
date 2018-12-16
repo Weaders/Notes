@@ -9,3 +9,4 @@ bin
 **/assets/*.js
 **/assets/*.js.map
 NotesMVC/appsettings.json
+.env
