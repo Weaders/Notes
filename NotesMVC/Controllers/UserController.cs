@@ -75,5 +75,16 @@ namespace NotesMVC.Controllers {
 
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetCurrentUser() {
+
+            if (User != null) {
+                return Json(await _usersManager.GetUserAsync(User));
+            } else {
+                return Json(null);
+            }
+
+        }
+
     }
 }

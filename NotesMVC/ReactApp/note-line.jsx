@@ -1,5 +1,5 @@
 ﻿import NoteForm from "./note-form.jsx";
-import RestClient from './rest-client'
+import RestClient from './rest/rest-client'
 
 class NoteLine extends React.Component {
 
@@ -8,18 +8,16 @@ class NoteLine extends React.Component {
         super(props);
 
         /**
-         * @type {{noteItem: NoteItem, isExapanded: Boolean, isEdit: Boolean, secretKey: string}}
+         * @type {{noteItem: NoteItem, isExapanded: Boolean, isEdit: Boolean}}
          */
         this.state = {
             noteItem: props.noteItem,
             isExapanded: false,
             isEdit: false,
-            secretKey: props.secretKey,
             onRemove: props.onRemove
         };
 
         this.handleEditClick = this.handleEditClick.bind(this);
-        this.handleExpandClick = this.handleExpandClick.bind(this);
         this.onNoteEdit = this.onNoteEdit.bind(this);
         this.handleRemoveClick = this.handleRemoveClick.bind(this);
 
@@ -29,10 +27,6 @@ class NoteLine extends React.Component {
 
     handleEditClick() {
         this.setState({ isEdit: !this.state.isEdit, isExapanded: true });
-    }
-
-    handleExpandClick() {
-        this.setState({ isExapanded: !this.state.isExapanded });
     }
 
     onNoteEdit(noteFor, noteItem) {
@@ -74,13 +68,13 @@ class NoteLine extends React.Component {
         let noteBody = <p className="card-text">{this.state.noteItem.text}</p>
 
         if (this.state.isEdit) {
-            noteBody = <NoteForm title={this.state.noteItem.title} onFormSend={this.onNoteEdit} text={this.state.noteItem.text} id={this.state.noteItem.id} secretKey={this.state.secretKey} />
+            noteBody = <NoteForm title={this.state.noteItem.title} onFormSend={this.onNoteEdit} text={this.state.noteItem.text} id={this.state.noteItem.id} />
         }
 
         return (<div className={cardClasses}>
 
-            <div role="group" className="btn-group note-header-btns">
-                <button onClick={this.handleExpandClick} type="button" data-toggle="collapse" data-target={`#${noteBodyId}`} className="btn btn-title">{this.state.noteItem.title}</button>
+            <div role="group" className="btn-group note-header-btns card-header">
+                <button type="button" data-toggle="collapse" data-target={`#${noteBodyId}`} className="btn btn-title">{this.state.noteItem.title}</button>
                 <button className="btn btn-edit" onClick={this.handleEditClick}><i className="fas fa-edit"></i></button>
                 <button className="btn btn-remove" onClick={this.handleRemoveClick}><i className="fas fa-trash"></i></button>
             </div>

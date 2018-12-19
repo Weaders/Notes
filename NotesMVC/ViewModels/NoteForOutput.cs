@@ -7,9 +7,11 @@ namespace NotesMVC.ViewModels {
 
     public class NoteForOutput {
 
-        public NoteForOutput(Note note, ICryptograph cryptograph, string secretCode) {
+        public NoteForOutput(Note note, CryptographManager manager, string secretCode) {
 
             Id = note.Id;
+
+            var cryptograph = manager.Get(CryptographType.Get(note.CryptoName));
 
             try {
 

@@ -6,7 +6,7 @@ namespace NotesMVC.Models {
 
     public class DefaultContext : IdentityDbContext<User> {
 
-        public DbSet<Note> Notes { get; set; }
+        public virtual DbSet<Note> Notes { get; set; }
 
         public DefaultContext(DbContextOptions<DefaultContext> options) : base(options) {}
 

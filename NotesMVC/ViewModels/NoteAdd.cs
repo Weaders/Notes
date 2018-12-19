@@ -14,12 +14,22 @@ namespace NotesMVC.ViewModels {
         [Required]
         public string SecretKey { get; set; }
 
-        public Note ToNote(ICryptograph encoder, User user) {
+        [Required]
+        public string AlgorithmName { get; set; } = CryptographType.AES.Type;
+
+        public Note ToNote(CryptographManager manager, User user) {
+
+            if (AlgorithmName == null) {
+                AlgorithmName = CryptographType.AES.Type;
+            }
+
+            var encoder = manager.Get(CryptographType.Get(AlgorithmName));
 
             return new Note() {
                 Title = encoder.Encrypt(Title, SecretKey),
                 Text = encoder.Encrypt(Text, SecretKey),
-                User = user
+                User = user,
+                CryptoName = AlgorithmName
             };
 
         }

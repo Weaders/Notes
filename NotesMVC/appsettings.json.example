@@ -6,6 +6,6 @@
   },
   "AllowedHosts": "*",
   "ConnectionStrings": {
-    "DefaultConnection": "Server=localhost;Database=<db>;User Id=<user_id>;Password=<password>;"
+    "DefaultConnection": "Server=db;Database=master;User Id=SA;Password=<password>;"
   }
 }

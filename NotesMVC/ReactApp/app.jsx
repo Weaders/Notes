@@ -6,7 +6,9 @@ import { Route, Redirect } from 'react-router'
 import UserForm from './user-form.jsx'
 import NotesList from './notes-list.jsx'
 
-import history from './history'
+import history from './common/history'
+
+import appData from './models/app-data'
 
 class App extends React.Component {
 
@@ -16,8 +18,7 @@ class App extends React.Component {
 
         this.state = {
             isLoggin: false,
-            user: '',
-            key: ''
+            user: ''
         };
 
         this.onLogin = this.onLogin.bind(this);
@@ -27,15 +28,16 @@ class App extends React.Component {
 
     /**
      * Called on login
-     * @param {import("./user-form.jsx").UserForm} userForm
+     * @param {UserForm} userForm
      */
     onLogin(userForm) {
 
         this.setState({
             user: userForm.state.user,
-            key: userForm.state.pwd,
             isLoggin: true
         });
+
+        appData.user = this.state.user;
 
         history.push('/notes');
         
@@ -43,8 +45,10 @@ class App extends React.Component {
 
     render() {
 
-        return (<Switch><Route exact path='/' render={() => <UserForm onLogin={this.onLogin} />} />
-            <Route path='/notes' render={this._notesRouteRender} /></Switch>)
+        return (<Switch>
+                    <Route exact path='/' render={() => <UserForm onLogin={this.onLogin} />} />
+                    <Route path='/notes' render={this._notesRouteRender} />
+                </Switch>)
 
     }
 
@@ -53,7 +57,7 @@ class App extends React.Component {
         if (!this.state.isLoggin) {
             return <Redirect to="/"/>
         } else {
-            return <NotesList sercretKey={this.state.key} />
+            return <NotesList />
         }
 
     }

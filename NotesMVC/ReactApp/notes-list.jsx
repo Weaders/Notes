@@ -1,26 +1,26 @@
-﻿import RestClient from './rest-client'
+﻿import RestClient from './rest/rest-client'
 import NoteForm from './note-form.jsx'
 import NoteLine from './note-line.jsx'
-import NoteItem from './note-item'
+import NoteItem from './models/note-item'
+import SecretKeyForm from './secret-key-form.jsx'
 
-import appData from './app-data'
+import appData from './models/app-data'
 
 class NotesList extends React.Component {
 
     /**
-     * Init note list
-     * @param {{secretKey: string}} props 
+     * Create note list
+     * @param {{}} props 
      */
     constructor(props) {
 
         super(props);
 
         /**
-         * @type {{notes: NoteItem[], key: string, expandAdd: Boolean}}
+         * @type {{notes: NoteItem[], expandAdd: Boolean}}
          */
         this.state = {
             notes: [],
-            secretKey: props.sercretKey,
             expandAdd: false
         };
 
@@ -31,12 +31,17 @@ class NotesList extends React.Component {
         this.onNoteAdd = this.onNoteAdd.bind(this);
         this.onAddLineClick = this.onAddLineClick.bind(this);
         this.onRemoveNote = this.onRemoveNote.bind(this);
+        this.onSubmitSecretKey = this.onSubmitSecretKey.bind(this);
+        this._getForm = this._getForm.bind(this);
 
     }
 
+    /**
+     * Get notes from server.
+     */
     async fillNotes() {
 
-        let data = await this.restClient.get('notes/list', { key: this.state.secretKey });
+        let data = await this.restClient.get('notes/list', { key: appData.secretCode });
 
         this.setState({
             notes: data.map(n => new NoteItem(n.id, n.title, n.text))
@@ -70,6 +75,22 @@ class NotesList extends React.Component {
 
     }
 
+    /**
+     * On submit secret key form.
+     * Set secret key and after update notes.
+     * @param {SecretKeyForm} secretKeyForm 
+     */
+    onSubmitSecretKey(secretKeyForm) {
+
+        appData.secretCode = secretKeyForm.state.key;
+        this.fillNotes();
+
+    }
+
+    /**
+     * Toggle show form for add new note
+     * @param {Event} event 
+     */
     onAddLineClick(event) {
 
         this.setState({expandAdd: !this.state.expandAdd});
@@ -77,6 +98,9 @@ class NotesList extends React.Component {
 
     }
 
+    /**
+     * Get form for add new note.
+     */
     _getForm() {
 
         return <div className="card">
@@ -84,7 +108,7 @@ class NotesList extends React.Component {
                 Add
             </div>
             <div className="card-body">
-                <NoteForm secretKey={this.state.secretKey} onFormSend={this.onNoteAdd}/>
+                <NoteForm onFormSend={this.onNoteAdd}/>
             </div>
         </div>
 
@@ -95,10 +119,11 @@ class NotesList extends React.Component {
         let result = [];
 
         for (var note of this.state.notes) {
-            result.push(<NoteLine onRemove={this.onRemoveNote} key={note.id} secretKey={this.state.secretKey} noteItem={note} />);
+            result.push(<NoteLine onRemove={this.onRemoveNote} key={`${appData.secretCode}-${note.id}`} noteItem={note} />);
         }
 
         return (<div className="note-list">
+            <SecretKeyForm onSubmit={this.onSubmitSecretKey} />
             {result}
             {this._getForm()}
         </div>);

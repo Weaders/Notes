@@ -32,14 +32,15 @@ namespace NotesMVC.Controllers {
         /// </summary>
         /// <returns></returns>
         [Authorize]
-        public async Task<IActionResult> List() {
+        public async Task<IActionResult> List([FromQuery]string key) {
 
             var cryptographer = _manager.Get(CryptographType.AES);
             var user = await _userManager.GetUserAsync(User);
 
             var notesRdy = _db.Notes
                 .Where(n => n.User == user)
-                .Select(n => new NoteForOutput(n, cryptographer, Request.Query["key"]));
+                .Select(n => new NoteForOutput(n, _manager, key))
+                .ToArray();
 
             return Json(notesRdy);
 
@@ -56,10 +57,9 @@ namespace NotesMVC.Controllers {
         public async Task<IActionResult> AddNote([FromBody]NoteAdd noteModel) {
 
             if (!ModelState.IsValid) {
-                return Json(ModelState);
+                return new JsonFailResult(ModelState);
             }
 
-            var cryptographer = _manager.Get(CryptographType.AES);
             var user = await _userManager.GetUserAsync(User);
 
             if (user == null) {
@@ -69,12 +69,12 @@ namespace NotesMVC.Controllers {
 
             }
 
-            var note = noteModel.ToNote(cryptographer, user);
+            var note = noteModel.ToNote(_manager, user);
 
             await _db.AddAsync(note);
             await _db.SaveChangesAsync();
 
-            return Json(new NoteForOutput(note, cryptographer, noteModel.SecretKey));
+            return Json(new NoteForOutput(note, _manager, noteModel.SecretKey));
 
         }
 
@@ -88,6 +88,10 @@ namespace NotesMVC.Controllers {
         [Route("notes/{id:int}/edit")]
         public async Task<IActionResult> EditNote([FromBody]NoteEdit noteForm) {
 
+            if (!ModelState.IsValid) {
+                return new JsonFailResult(ModelState);
+            }
+
             var user = await _userManager.GetUserAsync(User);
 
             if (user == null) {
@@ -100,9 +104,7 @@ namespace NotesMVC.Controllers {
                 return new JsonFailResult("There no note with this id");
             } else {
 
-                var cryptograph = _manager.Get(CryptographType.AES);
-
-                var newNote = noteForm.ToNote(cryptograph, user);
+                var newNote = noteForm.ToNote(_manager, user);
 
                 note.Text = newNote.Text;
                 note.Title = newNote.Title;
@@ -110,7 +112,7 @@ namespace NotesMVC.Controllers {
                 _db.Notes.Update(note);
                 await _db.SaveChangesAsync();
 
-                return Json(new NoteForOutput(note, cryptograph, noteForm.SecretKey));
+                return Json(new NoteForOutput(note, _manager, noteForm.SecretKey));
             }
 
         }
@@ -134,7 +136,7 @@ namespace NotesMVC.Controllers {
             var note = await _db.Notes.FirstOrDefaultAsync(n => n.Id == id && n.User == user);
 
             if (note == null) {
-                return new JsonFailResult("User dont have note with that id.");
+                return new JsonFailResult("User don't have note with that id.");
             }
 
             _db.Notes.Remove(note);

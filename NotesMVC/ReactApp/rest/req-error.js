@@ -9,7 +9,6 @@ class ReqError {
     constructor(data) {
 
         if (_.isString(data)) {
-            console.log(data);
             data = JSON.parse(data);
         }
 

@@ -1,5 +1,9 @@
-﻿import RestClient from './rest-client';
-import NoteItem from './note-item'
+﻿import RestClient from './rest/rest-client';
+import NoteItem from './models/note-item'
+import ReqError from './rest/req-error';
+
+import appData from './models/app-data'
+import { EVENT_CODE_CHANGED } from './models/app-data'
 
 class NoteForm extends React.Component {
 
@@ -8,58 +12,54 @@ class NoteForm extends React.Component {
         super(props);
 
         this.state = {
-            id: props.id,
-            title: props.title,
-            text: props.text,
-            secretKey: props.secretKey,
+            id: props.id || 0,
+            title: props.title || '',
+            text: props.text || '',
             onFormSend: props.onFormSend
         };
 
-        this.handleChangeText = this.handleChangeText.bind(this);
-        this.handleChangeTitle = this.handleChangeTitle.bind(this);
+        this.handleChangeInput = this.handleChangeInput.bind(this);
         this.handleClick = this.handleClick.bind(this);
+
+        appData.on(EVENT_CODE_CHANGED, () => {
+            this.forceUpdate();
+        });
 
         this.restClient = new RestClient();
 
     }
 
-    handleChangeTitle(event) {
-
-        this.setState({ title: event.target.value });
-        event.preventDefault();
-
-    }
-
-    handleChangeText(event) {
-
-        this.setState({ text: event.target.value });
-        event.preventDefault();
-
+    handleChangeInput(event) {
+        this.setState({[event.target.name]: event.target.value});
     }
 
     async handleClick(event) {
 
+        let result = null;
+
         if (this.state.id) {
 
-            let note = await this.restClient.post(`notes/${this.state.id}/edit`, { 
+            result = await this.restClient.post(`notes/${this.state.id}/edit`, { 
                 text: this.state.text, 
                 title: this.state.title, 
                 id: this.state.id,
-                secretKey: this.state.secretKey
+                secretKey: appData.secretCode
             });
-
-            this.state.onFormSend(this, new NoteItem(note.id, note.title, note.text));
 
         } else {
 
-            let note = await this.restClient.post('notes/add', { 
+            result = await this.restClient.post('notes/add', { 
                 text: this.state.text, 
                 title: this.state.title,
-                secretKey: this.state.secretKey
+                secretKey: appData.secretCode
             });
 
-            this.state.onFormSend(this, new NoteItem(note.id, note.title, note.text));
+        }
 
+        if (result instanceof ReqError) {
+            console.warn(result.errors);
+        } else {
+            this.state.onFormSend(this, new NoteItem(result.id, result.title, result.text));
         }
 
     }
@@ -67,17 +67,18 @@ class NoteForm extends React.Component {
     render() {
 
         let btnText = this.state.id ? 'Edit' : 'Add' ;
+        let diabled = !appData.secretCode;
 
         return <form onSubmit={e => e.preventDefault()}>
             <div className="form-group">
                 <label htmlFor="user">Title</label>
-                <input value={this.state.title} id="title" className="form-control" onChange={this.handleChangeTitle} />
+                <input value={this.state.title} id="title" name="title" className="form-control" onChange={this.handleChangeInput} />
             </div>
             <div className="form-group">
                 <label htmlFor="text">Text</label>
-                <textarea value={this.state.text} id="text" className="form-control" onChange={this.handleChangeText} />
+                <textarea value={this.state.text} id="text" name="text" className="form-control" onChange={this.handleChangeInput} />
             </div>
-            <button onClick={this.handleClick} className="btn btn-primary">{btnText}</button>
+            <button onClick={this.handleClick} disabled={diabled} className="btn btn-primary">{btnText}</button>
         </form>
     }
 

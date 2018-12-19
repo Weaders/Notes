@@ -1,5 +1,4 @@
-﻿import RestClient from './rest-client'
-import history from './history'
+﻿import RestClient from './rest/rest-client'
 
 class UserForm extends React.Component {
 
