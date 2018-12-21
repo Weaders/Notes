@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 
-namespace NotesMVC.JsonResults {
+namespace NotesMVC.Output {
 
     public class ErrorsHandler {
 

@@ -8,7 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="ReactApp\rest-client.js" />
     <Content Include="ReactApp\user-form.jsx" />
     <Content Include="webpack.config.js" />
   </ItemGroup>

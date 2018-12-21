@@ -2,8 +2,8 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using NotesMVC.JsonResults;
 using NotesMVC.Models;
+using NotesMVC.Output;
 using NotesMVC.Services.Encrypter;
 using NotesMVC.ViewModels;
 using System.Linq;

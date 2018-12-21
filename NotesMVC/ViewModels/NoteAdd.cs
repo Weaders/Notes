@@ -17,6 +17,12 @@ namespace NotesMVC.ViewModels {
         [Required]
         public string AlgorithmName { get; set; } = CryptographType.AES.Type;
 
+        /// <summary>
+        /// Return note, based on data from current class.
+        /// </summary>
+        /// <param name="manager">For get cryptographer</param>
+        /// <param name="user">Owner of note</param>
+        /// <returns></returns>
         public Note ToNote(CryptographManager manager, User user) {
 
             if (AlgorithmName == null) {

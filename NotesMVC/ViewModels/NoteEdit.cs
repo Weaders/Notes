@@ -26,6 +26,12 @@ namespace NotesMVC.ViewModels {
         [JsonProperty("algorithName")]
         public string AlgorithName { get; set; } = CryptographType.AES.Type;
 
+        /// <summary>
+        /// Return note from current class.
+        /// </summary>
+        /// <param name="manager">For get Cryptographer</param>
+        /// <param name="user">Owner of note</param>
+        /// <returns></returns>
         public Note ToNote(CryptographManager manager, User user) {
 
             var encoder = manager.Get(CryptographType.Get(AlgorithName));

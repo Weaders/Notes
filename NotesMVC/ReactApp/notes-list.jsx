@@ -32,7 +32,7 @@ class NotesList extends React.Component {
         this.onAddLineClick = this.onAddLineClick.bind(this);
         this.onRemoveNote = this.onRemoveNote.bind(this);
         this.onSubmitSecretKey = this.onSubmitSecretKey.bind(this);
-        this._getForm = this._getForm.bind(this);
+        this._getAddForm = this._getAddForm.bind(this);
 
     }
 
@@ -101,7 +101,7 @@ class NotesList extends React.Component {
     /**
      * Get form for add new note.
      */
-    _getForm() {
+    _getAddForm() {
 
         return <div className="card">
             <div className="card-header" onClick={this.onAddLineClick}>
@@ -125,7 +125,7 @@ class NotesList extends React.Component {
         return (<div className="note-list">
             <SecretKeyForm onSubmit={this.onSubmitSecretKey} />
             {result}
-            {this._getForm()}
+            {this._getAddForm()}
         </div>);
 
     }

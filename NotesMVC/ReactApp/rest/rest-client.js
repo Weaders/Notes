@@ -67,9 +67,15 @@ class RestClient {
 
                 if (req.readyState == XMLHttpRequest.DONE) {
                     if (req.status === 200) {
-                        return res(JSON.parse(req.responseText));
+
+                        if(req.responseText) {
+                            return res(JSON.parse(req.responseText));
+                        } else {
+                            return res({}); // Result with empty object, if there no body.
+                        }
+
                     } else {
-                        return rej(new ReqError(req.responseText));
+                        return rej(new ReqError(req.responseText, req.status));
                     }
 
                 }

@@ -1,9 +1,12 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using NotesMVC.JsonResults;
 using NotesMVC.Models;
+using NotesMVC.Output;
 using NotesMVC.ViewModels;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication;
 
 namespace NotesMVC.Controllers {
     public class UserController : Controller {
@@ -16,6 +19,10 @@ namespace NotesMVC.Controllers {
             _signInManager = signInManager;
             _usersManager = usersManager;
 
+        }
+
+        public IActionResult LoginForm() {
+            return View();
         }
 
         [HttpPost]
@@ -76,13 +83,25 @@ namespace NotesMVC.Controllers {
         }
 
         [HttpGet]
+        [Authorize]
+        [Route("[controller]/current")]
         public async Task<IActionResult> GetCurrentUser() {
 
-            if (User != null) {
-                return Json(await _usersManager.GetUserAsync(User));
+            if (_signInManager.IsSignedIn(User)) {
+                return Json(new UserForOutput(await _usersManager.GetUserAsync(User)));
             } else {
                 return Json(null);
             }
+
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Logout() {
+
+            await HttpContext.SignOutAsync();
+            await _signInManager.SignOutAsync();
+
+            return Json("Ok!");
 
         }
 

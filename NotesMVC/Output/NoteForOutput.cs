@@ -3,7 +3,7 @@ using NotesMVC.Models;
 using NotesMVC.Services.Encrypter;
 using System.Text;
 
-namespace NotesMVC.ViewModels {
+namespace NotesMVC.Output {
 
     public class NoteForOutput {
 

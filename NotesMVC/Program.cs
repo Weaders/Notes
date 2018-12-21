@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace NotesMVC {
 
@@ -10,7 +11,13 @@ namespace NotesMVC {
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
-                .UseStartup<Startup>();
+                .UseStartup<Startup>()
+                .ConfigureLogging((hostingCtx, logging) => {
+
+                    logging.ClearProviders();
+                    logging.AddConsole();
+
+                });
     }
 
 }

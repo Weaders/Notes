@@ -1,14 +1,17 @@
 ﻿import "@babel/polyfill"
 
-import { HashRouter, Switch  } from 'react-router-dom'
+import { HashRouter, Switch } from 'react-router-dom'
 import { Route, Redirect } from 'react-router'
 
 import UserForm from './user-form.jsx'
 import NotesList from './notes-list.jsx'
+import Header from './header/header.jsx'
 
-import history from './common/history'
+import history from './common/history-app'
 
 import appData from './models/app-data'
+import { EVENT_USER_LOGOUT } from './models/app-data'
+import UserItem from "./models/user-item.js";
 
 class App extends React.Component {
 
@@ -16,10 +19,22 @@ class App extends React.Component {
 
         super(props);
 
+        /**
+         * @type {{isLoggin: boolean, user: UserItem}}
+         */
         this.state = {
             isLoggin: false,
-            user: ''
+            user: null
         };
+
+        appData.on(EVENT_USER_LOGOUT, () => {
+            
+            this.setState({
+                isLoggin: false,
+                user: null
+            });
+
+        });
 
         this.onLogin = this.onLogin.bind(this);
         this._notesRouteRender = this._notesRouteRender.bind(this);
@@ -28,34 +43,40 @@ class App extends React.Component {
 
     /**
      * Called on login
-     * @param {UserForm} userForm
+     * @param {UserItem} userItem
      */
-    onLogin(userForm) {
+    onLogin(userItem) {
 
         this.setState({
-            user: userForm.state.user,
+            user: userItem,
             isLoggin: true
         });
 
         appData.user = this.state.user;
 
         history.push('/notes');
-        
+
     }
 
     render() {
 
-        return (<Switch>
-                    <Route exact path='/' render={() => <UserForm onLogin={this.onLogin} />} />
-                    <Route path='/notes' render={this._notesRouteRender} />
-                </Switch>)
+        return (
+            <div id="app">
+                <Header />
+                <div className="container body-content" id="content">
+                    <Switch>
+                        <Route exact path='/' render={() => <UserForm getCurrentUser={true} onLogin={this.onLogin} />} />
+                        <Route path='/notes' render={this._notesRouteRender} />
+                    </Switch>
+                </div>
+            </div>)
 
     }
 
     _notesRouteRender() {
 
         if (!this.state.isLoggin) {
-            return <Redirect to="/"/>
+            return <Redirect to="/" />
         } else {
             return <NotesList />
         }
@@ -64,4 +85,4 @@ class App extends React.Component {
 
 }
 
-ReactDOM.render(<HashRouter><App /></HashRouter>, document.getElementById("content"));
+ReactDOM.render(<HashRouter><App /></HashRouter>, document.getElementById("body"));

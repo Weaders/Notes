@@ -1,11 +1,13 @@
-﻿class SecretKeyForm extends React.Component {
+﻿import appData from './models/app-data'
+
+class SecretKeyForm extends React.Component {
 
     constructor(props) {
 
         super(props);
 
         this.state = {
-            key: '',
+            key: appData.secretCode,
             onSubmit: props.onSubmit || (() => { })
         };
 
@@ -35,7 +37,7 @@
 
     render() {
         return (<div className="input-group mb-3">
-                    <input itemType="text" className="form-control" onChange={this._onChangeSecretKey} placeholder="Secret key"/>
+                    <input itemType="text" value={this.state.key} className="form-control" onChange={this._onChangeSecretKey} placeholder="Secret key"/>
                     <div className="input-group-append">
                         <button className="btn btn-outline-secondary" onClick={this._onSubmit} type="button">Send</button>
                     </div>

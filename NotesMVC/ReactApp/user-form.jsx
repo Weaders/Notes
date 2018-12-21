@@ -1,4 +1,6 @@
 ﻿import RestClient from './rest/rest-client'
+import ReqError from './rest/req-error'
+import UserItem from './models/user-item';
 
 class UserForm extends React.Component {
 
@@ -9,7 +11,9 @@ class UserForm extends React.Component {
         this.state = {
             user: '',
             pwd: '',
-            errors: new Map()
+            errors: new Map(),
+            onLogin: props.onLogin || (() => { }),            
+            loading: false
         };
 
         this.handleChangePassword = this.handleChangePassword.bind(this);
@@ -18,6 +22,14 @@ class UserForm extends React.Component {
         this.handleRegister = this.handleRegister.bind(this);
 
         this.restClient = new RestClient();
+
+    }
+
+    componentDidMount() {
+        
+        if (this.props.getCurrentUser) {
+            this.tryGetUser();
+        }
 
     }
 
@@ -55,8 +67,15 @@ class UserForm extends React.Component {
 
         }
 
-        if (this.props.onLogin) {
-            this.props.onLogin(this);
+        if (this.state.onLogin) {
+
+            let userItem = new UserItem();
+
+            userItem.id = data.id;
+            userItem.username = data.username;
+
+            this.state.onLogin(userItem);
+
         }
 
     }
@@ -65,23 +84,61 @@ class UserForm extends React.Component {
 
         event.preventDefault();
 
+        let data = null;
+
         try {
 
-            let data = await this.restClient.post('user/register', {
+            data = await this.restClient.post('user/register', {
                 user: this.state.user,
                 password: this.state.pwd
             });
-
-            if (this.props.onLogin) {
-                this.props.onLogin(this);
-            }
 
         } catch (reqError) {
             this.setState({ errors: reqError.errors })
         }
 
+        if (this.state.onLogin) {
+
+            let userItem = new UserItem();
+
+            userItem.id = data.id;
+            userItem.username = data.username;
+            
+            this.state.onLogin(userItem);
+
+        }
+
     }
 
+    async tryGetUser() {
+
+        this.setState({loading: true});
+
+        let data = null;
+
+        try {
+            data = await this.restClient.get('user/current');
+        } catch (reqError) {
+
+            if (reqError.status != 304) {
+                console.warn(reqError.errors);
+            }
+            
+            return;
+        }
+        
+        let userItem = new UserItem();
+
+        userItem.id = data.id;
+        userItem.username = data.username;
+
+        if (this.state.onLogin) {
+            this.state.onLogin(userItem);
+        }
+
+        this.setState({loading: false});
+
+    }
 
     handleSubmit() {
         event.preventDefault();
@@ -94,7 +151,7 @@ class UserForm extends React.Component {
         let errorEle = '';
 
         for (let [key, error] of this.state.errors) {
-            errors.push(<p className="error-text" data-field={key}>{error}</p>);
+            errors.push(<p className="error-text" key={key} data-field={key}>{error}</p>);
         }
 
         if (errors.length) {

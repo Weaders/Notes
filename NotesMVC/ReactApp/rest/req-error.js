@@ -6,10 +6,12 @@ class ReqError {
      * Init request error.
      * @param {{errors: {}}|string} data 
      */
-    constructor(data) {
+    constructor(data, code) {
 
-        if (_.isString(data)) {
+        if (_.isString(data) && data) {
             data = JSON.parse(data);
+        } else {
+            data = {};
         }
 
         /**
@@ -17,6 +19,8 @@ class ReqError {
          * @type {Map<string, string>}
          */
         this.errors = new Map();
+
+        this.statusCode = code || null;
 
         if (data.errors) {
 
