@@ -1,14 +1,13 @@
 ﻿'use strict';
 
-const webpack = require('webpack');
 const path = require('path');
 
 const bundleFolder = "./wwwroot/assets/";
-const srcFolder = "./ReactApp/app.jsx"
 
 module.exports = {
+    mode: 'development',
     entry: [
-        srcFolder
+        "./ReactApp/index.js"
     ],
     devtool: "source-map",
     output: {
@@ -19,7 +18,7 @@ module.exports = {
     module: {
         rules: [
             {
-                test: /\.jsx$/,
+                test: /\.jsx?$/,
                 exclude: /(node_modules)/,
                 loader: "babel-loader",
                 query: {

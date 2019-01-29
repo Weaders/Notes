@@ -1,18 +1,10 @@
-import _ from 'lodash'
-
 class ReqError {
     
     /**
      * Init request error.
-     * @param {{errors: {}}|string} data 
+     * @param {{errors: {}}|{}} data 
      */
     constructor(data, code) {
-
-        if (_.isString(data) && data) {
-            data = JSON.parse(data);
-        } else {
-            data = {};
-        }
 
         /**
          * Map of errors
@@ -22,7 +14,7 @@ class ReqError {
 
         this.statusCode = code || null;
 
-        if (data.errors) {
+        if (data && data.errors) {
 
             for (let key in data.errors) {
 

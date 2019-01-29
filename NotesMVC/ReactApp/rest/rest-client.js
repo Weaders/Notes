@@ -12,15 +12,16 @@ class RestClient {
      */
     async post(endpoint, data) {
 
-        let req = new XMLHttpRequest();
+        let fetchResponse = await fetch('/' + endpoint, {
+            method: 'POST',
+            headers: {
+                'Content-type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
 
-        req.open('POST', '/' + endpoint, true);
+        return this.response(fetchResponse);
 
-        req.setRequestHeader("Content-type", "application/json");
-
-        req.send(JSON.stringify(data));
-
-        return this.resultHandler(req);
 
     }
 
@@ -30,13 +31,11 @@ class RestClient {
      */
     async delete(endpoint) {
 
-        let req = new XMLHttpRequest();
+        let fetchResponse = await fetch('/' + endpoint, {
+            method: 'DELETE'
+        })
 
-        req.open('DELETE', '/' + endpoint, true);
-
-        req.send();
-
-        return this.resultHandler(req);
+        return this.response(fetchResponse);
 
     }
 
@@ -49,40 +48,34 @@ class RestClient {
 
         var queryStr = queryString.stringify(queryObj);
 
-        var req = new XMLHttpRequest();
+        let fetchResponse = await fetch('/' + endpoint + '?' + queryStr, {
+            headers: {
+                'Content-type': 'application/json'
+            }
+        })
 
-        req.open('GET', '/' + endpoint + '?' + queryStr, true);
-        req.setRequestHeader('Content-type', 'application/json');
-        req.send();
-
-        return this.resultHandler(req);
+        return this.response(fetchResponse);
 
     }
 
-    async resultHandler(req) {
+    async response(fetchResponse) {
 
-        return new Promise((res, rej) => {
+        if (fetchResponse.status === 200) {
+            return fetchResponse.json();
+        } else {
 
-            req.onreadystatechange = () => {
+            let body = '';
 
-                if (req.readyState == XMLHttpRequest.DONE) {
-                    if (req.status === 200) {
-
-                        if(req.responseText) {
-                            return res(JSON.parse(req.responseText));
-                        } else {
-                            return res({}); // Result with empty object, if there no body.
-                        }
-
-                    } else {
-                        return rej(new ReqError(req.responseText, req.status));
-                    }
-
-                }
-
+            if (fetchResponse.bodyUsed) {
+                body = fetchResponse.json();
+            } else {
+                body = 'error';
             }
 
-        });
+            let err = new ReqError(body, fetchResponse.status);
+
+            throw err;
+        }
 
     }
 

@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authentication.Cookies;
+﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -6,7 +6,6 @@ using NotesMVC.Models;
 using NotesMVC.Output;
 using NotesMVC.ViewModels;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication;
 
 namespace NotesMVC.Controllers {
     public class UserController : Controller {
@@ -30,14 +29,15 @@ namespace NotesMVC.Controllers {
 
             if (ModelState.IsValid) {
 
-                var user = await _usersManager.FindByNameAsync(model.User);                
+                var user = await _usersManager.FindByNameAsync(model.User);
 
                 if (user != null) {
 
                     if (await _usersManager.CheckPasswordAsync(user, model.Password)) {
 
                         await _signInManager.SignInAsync(user, true);
-                        return Json("OK");
+
+                        return Json(new UserForOutput(user));
 
                     } else {
                         ModelState.AddModelError("bad_login", "Bad login or password.");
@@ -68,12 +68,20 @@ namespace NotesMVC.Controllers {
 
                     newUser.PasswordHash = _usersManager.PasswordHasher.HashPassword(newUser, model.Password);
 
-                    await _usersManager.CreateAsync(newUser);
+                    var result = await _usersManager.CreateAsync(newUser);
 
-                    return Json("Ok");
+                    if (result.Succeeded) {
+                        return Json(new UserForOutput(newUser));
+                    } else {
+
+                        foreach (var error in result.Errors) {
+                            ModelState.AddModelError(error.Code, error.Description);
+                        }
+
+                    }
 
                 } else {
-                    ModelState.AddModelError("exists_user", "Пользователь уже существуетs");
+                    ModelState.AddModelError("exists_user", "Пользователь уже существует");
                 }
 
             }

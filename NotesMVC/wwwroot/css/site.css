@@ -1,4 +1,12 @@
-﻿a.logout-link:not([href]),
+﻿@import './loading-box.css';
+
+html, body, #body {
+    height: 100%;
+}
+#app.loading {
+    height: 100%;
+}
+a.logout-link:not([href]),
 a.logout-link:not([href]):hover
 {
     color: white;
@@ -23,6 +31,7 @@ p.error-text {
 }
 .note-list {
     margin-top: 10px;
+    position: relative;
 }
 .note-list .note-line {
     border-radius: 0;
