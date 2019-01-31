@@ -35,7 +35,8 @@ namespace NotesMVC.tests {
                     Id = 1,
                     Text = new byte[] { 0x0019, 0x0032 },
                     Title = new byte[] { 0x0056, 0x00C1 },
-                    User = user
+                    User = user,
+                    CryptoName = CryptographType.AES.Type
                 }
             };
 
@@ -170,13 +171,15 @@ namespace NotesMVC.tests {
                     Id = 1,
                     Text = new byte[] { 0x0019, 0x0032 },
                     Title = new byte[] { 0x0056, 0x00C1 },
-                    User = user
+                    User = user,
+                    CryptoName = CryptographType.AES.Type
                 },
                 new Note() {
                     Id = 2,
                     Text = new byte[] { 0x01, 0x12 },
                     Title = new byte[] { 0x02, 0x03 },
-                    User = null
+                    User = null,
+                    CryptoName = CryptographType.AES.Type
                 }
             };
 

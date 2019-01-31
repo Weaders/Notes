@@ -108,6 +108,7 @@ namespace NotesMVC.Controllers {
 
                 note.Text = newNote.Text;
                 note.Title = newNote.Title;
+                note.CryptoName = newNote.CryptoName;
 
                 _db.Notes.Update(note);
                 await _db.SaveChangesAsync();

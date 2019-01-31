@@ -22,8 +22,8 @@ namespace NotesMVC.ViewModels {
         [Required]
         public string SecretKey { get; set; }
 
-        [Required]
         [JsonProperty("algorithName")]
+        [Required]
         public string AlgorithName { get; set; } = CryptographType.AES.Type;
 
         /// <summary>
