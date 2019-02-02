@@ -1,4 +1,5 @@
 ﻿import PropTypes from 'prop-types'
+import Errors from './Errors'
 
 class NoteForm extends React.Component {
 
@@ -8,6 +9,7 @@ class NoteForm extends React.Component {
             title: PropTypes.string,
             text: PropTypes.string,
             id: PropTypes.number,
+            errors: PropTypes.instanceOf(Map).isRequired,
             secretCode: PropTypes.string.isRequired,
             onFormSend: PropTypes.func.isRequired
         };
@@ -46,6 +48,7 @@ class NoteForm extends React.Component {
         let diabled = this.props.secretCode.length == 0;
 
         return <form onSubmit={e => e.preventDefault()}>
+            {!this.props.errors.size || <Errors errors={this.props.errors} />}
             <div className="form-group">
                 <label htmlFor="user">Title</label>
                 <input value={this.state.title} id="title" name="title" className="form-control" onChange={this.handleChangeInput} />

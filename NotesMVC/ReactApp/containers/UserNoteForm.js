@@ -5,9 +5,17 @@ import { connect } from 'react-redux'
 
 const mapStateToProps = function (state, ownProps) {
 
-    return {
+    let props = {
         secretCode: state.secretCode
     };
+
+    if (ownProps.id) {
+        props.errors = state.notes.errorsOnEdit.get(ownProps.id) || new Map()
+    } else {
+        props.errors = state.notes.errorsOnAdd;
+    }
+
+    return props;
 
 }
 

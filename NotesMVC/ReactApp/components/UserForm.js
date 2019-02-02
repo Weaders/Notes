@@ -1,6 +1,7 @@
 ﻿import RestClient from '../rest/rest-client'
 import UserItem from '../models/UserItem';
 import PropTypes from 'prop-types'
+import Error from './Errors'
 
 class UserForm extends React.Component {
 
@@ -95,23 +96,8 @@ class UserForm extends React.Component {
 
     render() {
 
-        let errors = [];
-        let errorEle = '';
-
-        for (let [key, error] of this.props.errors) {
-            errors.push(<p className="error-text" key={key} data-field={key}>{error}</p>);
-        }
-
-        if (errors.length) {
-
-            errorEle = <div className="alert alert-danger">
-                {errors}
-            </div>
-
-        }
-
         return <form className="user-form" onSubmit={e => e.preventDefault()}>
-            {errorEle}
+            {!this.props.errors.size || <Error errors={this.props.errors} />}
             <div className="form-group">
                 <label htmlFor="user">User</label>
                 <input value={this.state.user} id="user" className="form-control" onChange={this.handleChangeUser} />

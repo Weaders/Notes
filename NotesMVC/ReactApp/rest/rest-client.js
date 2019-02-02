@@ -58,23 +58,29 @@ class RestClient {
 
     }
 
+    /**
+     * @param {Response} fetchResponse 
+     */
     async response(fetchResponse) {
 
         if (fetchResponse.status === 200) {
             return fetchResponse.json();
         } else {
 
-            let body = '';
+            let body = {};
 
-            if (fetchResponse.bodyUsed) {
-                body = fetchResponse.json();
-            } else {
-                body = 'error';
+            if (fetchResponse.status !== 401) {
+
+                try {
+                    body = await fetchResponse.json();
+                } catch {
+                    console.warn('Get body, that can not be parsed like json');
+                }
+
             }
+           
+            throw new ReqError(body, fetchResponse.status);
 
-            let err = new ReqError(body, fetchResponse.status);
-
-            throw err;
         }
 
     }

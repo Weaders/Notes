@@ -3,46 +3,57 @@
 html, body, #body {
     height: 100%;
 }
+
 #app.loading {
     height: 100%;
 }
+
 a.logout-link:not([href]),
-a.logout-link:not([href]):hover
-{
+a.logout-link:not([href]):hover {
     color: white;
     cursor: pointer;
 }
+
 .user-form {
     margin-top: 20px;
 }
+
 .user-form .user-form-buttons .btn {
     margin-left: 10px;
 }
+
 .user-form .user-form-buttons .btn:first-child {
     margin-left: 0px;
 }
+
 p.error-text {
-    margin-bottom:0;
+    margin-bottom: 0;
 }
+
 .note-add {
     margin-top: 20px;
     border-top: 1px solid #d0caca;
     padding-top: 10px;
 }
+
 .note-list {
     margin-top: 10px;
     position: relative;
 }
+
 .note-list .note-line {
     border-radius: 0;
     border-bottom: 0;
 }
+
 .note-list .note-line.expanded .btn {
     border-bottom: 1px solid rgba(0,0,0,.125)
 }
+
 .note-list .note-header-btns {
     padding: 0;
 }
+
 .note-header-btns .btn-title,
 .note-header-btns .btn-title:focus {
     width: 93%;
@@ -52,30 +63,35 @@ p.error-text {
     z-index: 1;
     box-shadow: none;
 }
+
 .note-header-btns .btn-edit,
 .note-header-btns .btn-remove,
 .note-header-btns .btn-edit:hover,
 .note-header-btns .btn-remove:hover,
 .note-header-btns .btn-edit:focus,
-.note-header-btns .btn-remove:focus
-{
+.note-header-btns .btn-remove:focus {
     background-color: white;
     border-radius: 0;
     box-shadow: none;
     z-index: 0;
 }
+
 .note-header-btns .btn-remove {
     color: #942f2f;
 }
+
 .note-header-btns .btn-edit {
     color: #a96c10;
 }
+
 .note-header-btns .btn-remove:hover {
     color: #d41d1d;
 }
-.note-header-btns .btn-edit:hover{
+
+.note-header-btns .btn-edit:hover {
     color: #ef8815;
 }
+
 .note-header-btns .btn-remove {
     border-left: 1px solid rgba(0,0,0,.125)
 }

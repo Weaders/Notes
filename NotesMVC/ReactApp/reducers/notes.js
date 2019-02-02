@@ -14,12 +14,17 @@ import {
 } from './../actions/notes'
 
 import _ from 'lodash'
+import NoteItem from '../models/NoteItem';
 
+/**
+ * @type {{notesArray: NoteItem[], isLoadNotes: boolean, isLoadAddNote: boolean, errorsOnAdd: Map<string, string>, errorsOnEdit: Map<number, Map<string, string>>, isRemoveLoadIds: number[], isEditLoadIds: number[]}}
+ */
 const initialState = {
     notesArray: [],
     isLoadNotes: false,
     isLoadAddNote: false,
-    errorStates: [],
+    errorsOnAdd: new Map(),
+    errorsOnEdit: new Map(),
     isRemoveLoadIds: [],
     isEditLoadIds: []
 };
@@ -51,12 +56,16 @@ export default (state = initialState, action) => {
             return {
                 ...state,
                 isLoadAddNote: true,
+                errorsOnAdd: new Map()
             }
         case ACTION_NOTES_ADD_FAIL:
+
             return {
                 ...state,
-                isLoadAddNote: false
+                isLoadAddNote: false,
+                errorsOnAdd: action.reqError.errors,
             }
+
         case ACTION_NOTES_ADD_SUCCESS:
             return {
                 ...state,
@@ -64,7 +73,7 @@ export default (state = initialState, action) => {
 
             }
         case ACTION_NOTES_REMOVE_START:
-            
+
             return {
                 ...state,
                 isRemoveLoadIds: [...state.isRemoveLoadIds, action.id]
@@ -92,28 +101,36 @@ export default (state = initialState, action) => {
                 isRemoveLoadIds: newIds,
                 notesArray: newItems
             };
-        
+
         case ACTION_NOTES_EDIT_START:
-            
-            return {
+
+            let newStateEditStart = {
                 ...state,
                 isEditLoadIds: [...state.isEditLoadIds, action.id]
-            }
+            };
+
+            newStateEditStart.errorsOnEdit.delete(action.id);
+
+            return newStateEditStart;
 
         case ACTION_NOTES_EDIT_FAIL:
-            
-            return {
+
+            let newStateEditFail = {
                 ...state,
                 isEditLoadIds: _.without(state.isEditLoadIds, action.id)
-            }
-        
+            };
+
+            newStateEditFail.errorsOnEdit.set(action.id, action.reqError.errors);
+
+            return newStateEditFail;
+
         case ACTION_NOTES_EDIT_SUCCESS:
-            
-            let noteIndex = _.findIndex(state.notesArray, ({id}) => id == action.item.id);
+
+            let noteIndex = _.findIndex(state.notesArray, ({ id }) => id == action.item.id);
             let newNotes = [...state.notesArray];
 
             newNotes[noteIndex] = action.item;
-            
+
             return {
                 ...state,
                 notesArray: newNotes,

@@ -1,22 +1,21 @@
 ﻿using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
-using Moq;
-using System.Security.Claims;
-using System.Linq;
-using System.Collections.Generic;
-using NotesMVC.tests.DbSetClasses;
-using Microsoft.AspNetCore.Mvc.Internal;
-using Microsoft.Extensions.Localization;
-using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc.DataAnnotations;
-using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Mvc.DataAnnotations.Internal;
+using Microsoft.AspNetCore.Mvc.Internal;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Moq;
 using NotesMVC.Models;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using System.Threading.Tasks;
+using NotesMVC.tests.DbSetClasses;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
 
 namespace NotesMVC.tests {
     public static class MockHelper {
@@ -38,7 +37,7 @@ namespace NotesMVC.tests {
 
         }
 
-        public static Mock<DbSet<T>> GetDbSet<T>(T[] vals) where T: class {
+        public static Mock<DbSet<T>> GetDbSet<T>(T[] vals) where T : class {
 
             var valsQueryble = vals.AsQueryable();
 
