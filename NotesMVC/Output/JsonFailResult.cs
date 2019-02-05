@@ -16,13 +16,6 @@ namespace NotesMVC.Output {
 
         const int STATUS_CODE = 400;
 
-        public JsonFailResult(IDictionary<string, string> errors) : base(null) {
-
-            this.StatusCode = STATUS_CODE;
-            this.Value = new ErrorsHandler { Errors = errors };
-
-        }
-
         public JsonFailResult(string error) : base(null) {
 
             this.StatusCode = STATUS_CODE;

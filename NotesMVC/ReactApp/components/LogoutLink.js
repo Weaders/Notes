@@ -1,7 +1,12 @@
 import propTypes from 'prop-types'
+import { Translate } from "react-localize-redux"
 
 const LogoutLink = ({ onClick }) => {
-    return <a className="logout-link" onClick={() => { onClick() }}>Logout</a>
+    return <li className={"nav-item"}>
+        <a className="logout-link nav-link" onClick={() => { onClick() }}>
+            <Translate id="logout" />
+        </a>
+    </li>
 }
 
 LogoutLink.propsTypes = {

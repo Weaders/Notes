@@ -1,16 +1,19 @@
-﻿using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using NotesMVC.Models;
 using NotesMVC.Services.Encrypter;
 using React.AspNet;
 using System;
+using System.Globalization;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -36,9 +39,16 @@ namespace NotesMVC {
 
             });
 
+            services.AddLocalization(opts => opts.ResourcesPath = "Resources");
+
             var connectionStr = this.Configuration.GetConnectionString("DefaultConnection");
 
-            services.AddMvc();
+            services.AddMvc()
+                .AddDataAnnotationsLocalization(opts => {
+                    opts.DataAnnotationLocalizerProvider = (type, factory) =>
+                        factory.Create(typeof(SharedResources));
+                })
+                .AddViewLocalization();
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddReact();
@@ -63,6 +73,21 @@ namespace NotesMVC {
 
             });
 
+            services.Configure<RequestLocalizationOptions>(opts => {
+
+                opts.SupportedCultures = opts.SupportedUICultures = new[] {
+                    new CultureInfo("en"),
+                    new CultureInfo("ru")
+                };
+
+                opts.DefaultRequestCulture = new RequestCulture("en");
+
+                var cookieProvider = opts.RequestCultureProviders.OfType<CookieRequestCultureProvider>().First();
+
+                cookieProvider.CookieName = "CurrentLang";
+
+            });
+
             return services.BuildServiceProvider();
 
         }
@@ -80,6 +105,8 @@ namespace NotesMVC {
                 app.UseHsts();
 
             }
+
+            app.UseRequestLocalization(app.ApplicationServices.GetService<IOptions<RequestLocalizationOptions>>().Value);
 
             app.UseReact(config => { });
             app.UseHttpsRedirection();

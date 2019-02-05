@@ -2,6 +2,7 @@
 import UserNoteLine from './../containers/UserNoteLine'
 import SecretKeyForm from '../containers/SecretKeyForm'
 import LoadingBox from './LoadingBox'
+import { Translate } from 'react-localize-redux'
 
 import PropTypes from 'prop-types'
 
@@ -34,7 +35,7 @@ class NotesList extends React.Component {
 
         this.onAddLineClick = this.onAddLineClick.bind(this);
         this.onRemoveNote = this.onRemoveNote.bind(this);
-        this._getAddForm = this._getAddForm.bind(this);        
+        this._getAddForm = this._getAddForm.bind(this);
 
     }
 
@@ -59,7 +60,7 @@ class NotesList extends React.Component {
      */
     onAddLineClick(event) {
 
-        this.setState({expandAdd: !this.state.expandAdd});
+        this.setState({ expandAdd: !this.state.expandAdd });
         event.preventDefault();
 
     }
@@ -71,7 +72,7 @@ class NotesList extends React.Component {
 
         return <div className="card">
             <div className="card-header" onClick={this.onAddLineClick}>
-                Add
+                <Translate id="add" />
             </div>
             <div className="card-body">
                 <UserNoteForm />

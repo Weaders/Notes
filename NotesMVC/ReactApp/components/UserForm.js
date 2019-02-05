@@ -1,7 +1,9 @@
 ﻿import RestClient from '../rest/rest-client'
-import UserItem from '../models/UserItem';
+import UserItem from '../models/UserItem'
 import PropTypes from 'prop-types'
 import Error from './Errors'
+
+import { Translate } from "react-localize-redux";
 
 class UserForm extends React.Component {
 
@@ -99,16 +101,24 @@ class UserForm extends React.Component {
         return <form className="user-form" onSubmit={e => e.preventDefault()}>
             {!this.props.errors.size || <Error errors={this.props.errors} />}
             <div className="form-group">
-                <label htmlFor="user">User</label>
+                <label htmlFor="user">
+                    <Translate id="user" />
+                </label>
                 <input value={this.state.user} id="user" className="form-control" onChange={this.handleChangeUser} />
             </div>
             <div className="form-group">
-                <label htmlFor="password">Password</label>
+                <label htmlFor="password">
+                    <Translate id="password" />
+                </label>
                 <input type="password" value={this.state.password} id="password" className="form-control" onChange={this.handleChangePassword} />
             </div>
             <div className="user-form-buttons">
-                <button onClick={this.handleLogin} className="btn btn-primary">Login</button>
-                <button onClick={this.handleRegister} className="btn btn-second">Regiter</button>
+                <button onClick={this.handleLogin} className="btn btn-primary">
+                    <Translate id="login" />
+                </button>
+                <button onClick={this.handleRegister} className="btn btn-second">
+                    <Translate id="register" />
+                </button>
             </div>
         </form>
 

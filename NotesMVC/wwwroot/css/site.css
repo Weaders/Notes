@@ -95,3 +95,14 @@ p.error-text {
 .note-header-btns .btn-remove {
     border-left: 1px solid rgba(0,0,0,.125)
 }
+.flag-icon {
+    width: 20px;
+    height: 20px;
+}
+ul.navbar-nav div.dropdown-menu.lang-select {
+    position: absolute;
+    left: -15px;
+    border-top: 0;
+    border-radius: 0;
+    min-width: 50px;
+}

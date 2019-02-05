@@ -99,8 +99,6 @@ export const register = (user, pwd) => {
             userItem
         });
 
-        redirectToNotes();
-
     }    
 
 }
@@ -132,11 +130,12 @@ export const getCurrent = () => {
             
             dispatch({
                 type: ACTION_GET_CURRENT_END,
-                reslt: false,
+                result: false,
                 error: reqError
             });
 
             return;
+
         }
         
         let userItem = new UserItem();

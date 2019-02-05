@@ -1,11 +1,15 @@
 import UserLogoutLink from "./../containers/UserLogoutLink";
+import LangSelectDropdown from './LangSelectDropdown'
 import PropTypes from 'prop-types'
 
 const Header = (props) => {
 
-    return (<nav className="navbar navbar-dark bg-dark navbar-fixed-top">
+    return (<nav className="navbar navbar-dark bg-dark navbar-fixed-top navbar-expand">
         <a href="#" className="navbar-brand">Easy notes storage</a>
-        {!props.isLogoutShow || <UserLogoutLink/>}
+        <ul className="navbar-nav ml-auto">
+            <LangSelectDropdown />
+            {!props.isLogoutShow || <UserLogoutLink/>}
+        </ul>
     </nav>)
 
 }

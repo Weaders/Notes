@@ -1,6 +1,8 @@
 import App from '../components/App'
 import { getCurrent } from '../actions/user'
+
 import { withRouter } from 'react-router-dom'
+import { withLocalize } from 'react-localize-redux'
 
 import { connect } from 'react-redux'
 
@@ -22,4 +24,4 @@ const mapDispatchToProps = (dispatch, ownProps) => {
 
 }
 
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(App))
+export default withLocalize(withRouter(connect(mapStateToProps, mapDispatchToProps)(App)))

@@ -7,23 +7,23 @@ namespace NotesMVC.ViewModels {
     public class NoteEdit {
 
         [JsonProperty("id")]
-        [Required]
+        [Required(ErrorMessage = "Id Required")]
         public int Id { get; set; }
 
         [JsonProperty("text")]
-        [Required]
+        [Required(ErrorMessage = "Text Required")]
         public string Text { get; set; }
 
         [JsonProperty("title")]
-        [Required]
+        [Required(ErrorMessage = "Title Required")]
         public string Title { get; set; }
 
         [JsonProperty("secretKey")]
-        [Required]
+        [Required(ErrorMessage = "Secret key required")]
         public string SecretKey { get; set; }
 
         [JsonProperty("algorithName")]
-        [Required]
+        [Required(ErrorMessage = "Algorithm name required")]
         public string AlgorithName { get; set; } = CryptographType.AES.Type;
 
         /// <summary>

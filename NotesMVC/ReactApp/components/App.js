@@ -1,5 +1,5 @@
-import { Switch, withRouter } from 'react-router-dom'
-import { Route } from 'react-router'
+import { Route, Switch } from 'react-router'
+import { renderToStaticMarkup } from "react-dom/server";
 
 import propTypes from 'prop-types'
 
@@ -9,7 +9,28 @@ import UserNoteList from './../containers/UserNoteList'
 import LoadingBox from './LoadingBox'
 import UserHeader from './../containers/UserHeader'
 
+import enGlobal from './../translation/en.global.json'
+import ruGlobal from './../translation/ru.global.json'
+
 class App extends React.Component {
+
+    constructor(props) {
+
+        super(props);
+
+        this.props.initialize({
+            languages: [
+                { name: 'Russian', code: 'ru' },
+                { name: 'English', code: 'en' }
+            ],
+            translation: {},
+            options: { renderToStaticMarkup }
+        });
+
+        this.props.addTranslationForLanguage(enGlobal, 'en');
+        this.props.addTranslationForLanguage(ruGlobal, 'ru');
+
+    }
 
     static get propTypes() {
         return {
@@ -32,7 +53,6 @@ class App extends React.Component {
 
         return (
             <div id="app" className={appClasses.join(' ')}>
-
                 <UserHeader />
                 <div className="container">
                     <Switch>
@@ -41,7 +61,6 @@ class App extends React.Component {
                     </Switch>
                 </div>
                 {!this.props.isLoading || <LoadingBox />}
-                
             </div>
         )
 

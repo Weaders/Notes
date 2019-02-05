@@ -4,8 +4,12 @@ import { setCode } from '../actions/secret-code'
 import { connect } from 'react-redux'
 import { getNotes } from '../actions/notes';
 
+import { getTranslate } from 'react-localize-redux'
+
 const mapStateToProps = function(state, ownProps) {
-    return {};
+    return {
+        translate: getTranslate(state.localize)
+    };
 }
 
 const mapDispatchToProps = (dispatch, ownProps) => {

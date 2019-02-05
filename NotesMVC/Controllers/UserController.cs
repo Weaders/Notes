@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 using NotesMVC.Models;
 using NotesMVC.Output;
 using NotesMVC.ViewModels;
@@ -10,13 +11,15 @@ using System.Threading.Tasks;
 namespace NotesMVC.Controllers {
     public class UserController : Controller {
 
-        private readonly UserManager<User> _usersManager;
-        private readonly SignInManager<User> _signInManager;
+        private readonly UserManager<User> usersManager;
+        private readonly SignInManager<User> signInManager;
+        private readonly IStringLocalizer<SharedResources> sharedLocalizer;
 
-        public UserController(SignInManager<User> signInManager, UserManager<User> usersManager) {
+        public UserController(SignInManager<User> _signInManager, UserManager<User> _usersManager, IStringLocalizer<SharedResources> _sharedLocalize) {
 
-            _signInManager = signInManager;
-            _usersManager = usersManager;
+            signInManager = _signInManager;
+            usersManager = _usersManager;
+            sharedLocalizer = _sharedLocalize;
 
         }
 
@@ -29,22 +32,22 @@ namespace NotesMVC.Controllers {
 
             if (ModelState.IsValid) {
 
-                var user = await _usersManager.FindByNameAsync(model.User);
+                var user = await usersManager.FindByNameAsync(model.User);
 
                 if (user != null) {
 
-                    if (await _usersManager.CheckPasswordAsync(user, model.Password)) {
+                    if (await usersManager.CheckPasswordAsync(user, model.Password)) {
 
-                        await _signInManager.SignInAsync(user, true);
+                        await signInManager.SignInAsync(user, true);
 
                         return Json(new UserForOutput(user));
 
                     } else {
-                        ModelState.AddModelError("bad_login", "Bad login or password.");
+                        ModelState.AddModelError("bad_login", sharedLocalizer.GetString("Bad login or password"));
                     }
 
                 } else {
-                    ModelState.AddModelError("bad_login", "Bad login or password.");
+                    ModelState.AddModelError("bad_login", sharedLocalizer.GetString("Bad login or password"));
                 }
 
             }
@@ -58,7 +61,7 @@ namespace NotesMVC.Controllers {
 
             if (ModelState.IsValid) {
 
-                var user = await _usersManager.FindByNameAsync(model.User);
+                var user = await usersManager.FindByNameAsync(model.User);
 
                 if (user == null) {
 
@@ -66,12 +69,15 @@ namespace NotesMVC.Controllers {
                         UserName = model.User
                     };
 
-                    newUser.PasswordHash = _usersManager.PasswordHasher.HashPassword(newUser, model.Password);
+                    newUser.PasswordHash = usersManager.PasswordHasher.HashPassword(newUser, model.Password);
 
-                    var result = await _usersManager.CreateAsync(newUser);
+                    var result = await usersManager.CreateAsync(newUser);
 
                     if (result.Succeeded) {
+
+                        await signInManager.SignInAsync(newUser, true);
                         return Json(new UserForOutput(newUser));
+
                     } else {
 
                         foreach (var error in result.Errors) {
@@ -81,7 +87,7 @@ namespace NotesMVC.Controllers {
                     }
 
                 } else {
-                    ModelState.AddModelError("exists_user", "Пользователь уже существует");
+                    ModelState.AddModelError("exists_user", sharedLocalizer.GetString("User already exists"));
                 }
 
             }
@@ -95,8 +101,8 @@ namespace NotesMVC.Controllers {
         [Route("[controller]/current")]
         public async Task<IActionResult> GetCurrentUser() {
 
-            if (_signInManager.IsSignedIn(User)) {
-                return Json(new UserForOutput(await _usersManager.GetUserAsync(User)));
+            if (signInManager.IsSignedIn(User)) {
+                return Json(new UserForOutput(await usersManager.GetUserAsync(User)));
             } else {
                 return Json(null);
             }
@@ -107,7 +113,7 @@ namespace NotesMVC.Controllers {
         public async Task<IActionResult> Logout() {
 
             await HttpContext.SignOutAsync();
-            await _signInManager.SignOutAsync();
+            await signInManager.SignOutAsync();
 
             return Json("Ok!");
 

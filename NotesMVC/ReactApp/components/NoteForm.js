@@ -1,5 +1,6 @@
 ﻿import PropTypes from 'prop-types'
 import Errors from './Errors'
+import { Translate } from "react-localize-redux";
 
 class NoteForm extends React.Component {
 
@@ -44,20 +45,22 @@ class NoteForm extends React.Component {
 
     render() {
 
-        let btnText = this.state.id ? 'Edit' : 'Add';
+        let btnText = this.state.id ? new Translate({id: 'edit'}) : new Translate({id: 'add'});
         let diabled = this.props.secretCode.length == 0;
 
         return <form onSubmit={e => e.preventDefault()}>
             {!this.props.errors.size || <Errors errors={this.props.errors} />}
             <div className="form-group">
-                <label htmlFor="user">Title</label>
+                <label htmlFor="user"><Translate id="title" /></label>
                 <input value={this.state.title} id="title" name="title" className="form-control" onChange={this.handleChangeInput} />
             </div>
             <div className="form-group">
-                <label htmlFor="text">Text</label>
+                <label htmlFor="text"><Translate id="text" /></label>
                 <textarea value={this.state.text} id="text" name="text" className="form-control" onChange={this.handleChangeInput} />
             </div>
-            <button onClick={this.handleClick} disabled={diabled} className="btn btn-primary">{btnText}</button>
+            <button onClick={this.handleClick} disabled={diabled} className="btn btn-primary">
+                {btnText}
+            </button>
         </form>
     }
 

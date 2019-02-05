@@ -5,16 +5,16 @@ using System.ComponentModel.DataAnnotations;
 namespace NotesMVC.ViewModels {
     public class NoteAdd {
 
-        [Required]
+        [Required(ErrorMessage = "Title Required")]
         public string Title { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Text Required")]
         public string Text { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Secret key required")]
         public string SecretKey { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Algorithm name required")]
         public string AlgorithmName { get; set; } = CryptographType.AES.Type;
 
         /// <summary>

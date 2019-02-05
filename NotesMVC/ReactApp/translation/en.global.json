@@ -1,0 +1,13 @@
+{
+  "login": "Login",
+  "register": "Register",
+  "user": "Username",
+  "password": "Password",
+  "secretKey": "Secret key",
+  "send": "Send",
+  "logout": "Logout",
+  "add": "Add",
+  "title": "Title",
+  "text": "Text",
+  "edit": "Edit"
+}

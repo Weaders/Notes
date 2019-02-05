@@ -1,10 +1,12 @@
 ﻿import PropTypes from 'prop-types'
+import { Translate } from 'react-localize-redux'
 
 export default class KeyForm extends React.Component {
 
     static get propTypes() {
 
         return {
+            translate: PropTypes.func.isRequired,
             onSubmit: PropTypes.func.isRequired,
             key: PropTypes.string
         };
@@ -45,10 +47,14 @@ export default class KeyForm extends React.Component {
     }
 
     render() {
+
         return (<div className="input-group mb-3">
-            <input itemType="text" value={this.state.key} className="form-control" onChange={this.onChangeSecretKey} placeholder="Secret key" />
+            
+            <input itemType="text" value={this.state.key} className="form-control" onChange={this.onChangeSecretKey} placeholder={this.props.translate("secretKey")} />
             <div className="input-group-append">
-                <button className="btn btn-outline-secondary" onClick={this.onSubmit} type="button">Send</button>
+                <button className="btn btn-outline-secondary" onClick={this.onSubmit} type="button">
+                    <Translate id="send" />
+                </button>
             </div>
         </div>)
 

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 using NotesMVC.Models;
 using NotesMVC.Output;
 using NotesMVC.Services.Encrypter;
@@ -13,17 +14,19 @@ namespace NotesMVC.Controllers {
 
     public class NotesController : Controller {
 
-        private readonly DefaultContext _db;
-        private readonly CryptographManager _manager;
-        private readonly UserManager<User> _userManager;
-        private readonly SignInManager<User> _signInManager;
+        private readonly DefaultContext db;
+        private readonly CryptographManager manager;
+        private readonly UserManager<User> userManager;
+        private readonly SignInManager<User> signInManager;
+        private readonly IStringLocalizer<SharedResources> sharedLocalizer;
 
-        public NotesController(DefaultContext db, CryptographManager manager, UserManager<User> userManager, SignInManager<User> signInManager) {
+        public NotesController(DefaultContext _db, CryptographManager _manager, UserManager<User> _userManager, SignInManager<User> _signInManager, IStringLocalizer<SharedResources> _sharedLocalizer) {
 
-            _userManager = userManager;
-            _db = db;
-            _manager = manager;
-            _signInManager = signInManager;
+            userManager = _userManager;
+            db = _db;
+            manager = _manager;
+            signInManager = _signInManager;
+            sharedLocalizer = _sharedLocalizer;
 
         }
 
@@ -34,12 +37,12 @@ namespace NotesMVC.Controllers {
         [Authorize]
         public async Task<IActionResult> List([FromQuery]string key) {
 
-            var cryptographer = _manager.Get(CryptographType.AES);
-            var user = await _userManager.GetUserAsync(User);
+            var cryptographer = manager.Get(CryptographType.AES);
+            var user = await userManager.GetUserAsync(User);
 
-            var notesRdy = _db.Notes
+            var notesRdy = db.Notes
                 .Where(n => n.User == user)
-                .Select(n => new NoteForOutput(n, _manager, key))
+                .Select(n => new NoteForOutput(n, manager, key))
                 .ToArray();
 
             return Json(notesRdy);
@@ -60,21 +63,21 @@ namespace NotesMVC.Controllers {
                 return new JsonFailResult(ModelState);
             }
 
-            var user = await _userManager.GetUserAsync(User);
+            var user = await userManager.GetUserAsync(User);
 
             if (user == null) {
 
-                await this._signInManager.SignOutAsync();
-                return new JsonFailResult("Bad user.");
+                await this.signInManager.SignOutAsync();
+                return new JsonFailResult(sharedLocalizer.GetString("Bad user"));
 
             }
 
-            var note = noteModel.ToNote(_manager, user);
+            var note = noteModel.ToNote(manager, user);
 
-            await _db.AddAsync(note);
-            await _db.SaveChangesAsync();
+            await db.AddAsync(note);
+            await db.SaveChangesAsync();
 
-            return Json(new NoteForOutput(note, _manager, noteModel.SecretKey));
+            return Json(new NoteForOutput(note, manager, noteModel.SecretKey));
 
         }
 
@@ -92,28 +95,28 @@ namespace NotesMVC.Controllers {
                 return new JsonFailResult(ModelState);
             }
 
-            var user = await _userManager.GetUserAsync(User);
+            var user = await userManager.GetUserAsync(User);
 
             if (user == null) {
-                return new JsonFailResult("Bad user!");
+                return new JsonFailResult(sharedLocalizer.GetString("Bad user"));
             }
 
-            var note = await this._db.Notes.FirstOrDefaultAsync((n) => n.Id == noteForm.Id && n.User == user);
+            var note = await this.db.Notes.FirstOrDefaultAsync((n) => n.Id == noteForm.Id && n.User == user);
 
             if (note == null) {
-                return new JsonFailResult("There no note with this id");
+                return new JsonFailResult(sharedLocalizer.GetString("There no note with this id"));
             } else {
 
-                var newNote = noteForm.ToNote(_manager, user);
+                var newNote = noteForm.ToNote(manager, user);
 
                 note.Text = newNote.Text;
                 note.Title = newNote.Title;
                 note.CryptoName = newNote.CryptoName;
 
-                _db.Notes.Update(note);
-                await _db.SaveChangesAsync();
+                db.Notes.Update(note);
+                await db.SaveChangesAsync();
 
-                return Json(new NoteForOutput(note, _manager, noteForm.SecretKey));
+                return Json(new NoteForOutput(note, manager, noteForm.SecretKey));
             }
 
         }
@@ -128,21 +131,21 @@ namespace NotesMVC.Controllers {
         [Route("notes/{id:int}")]
         public async Task<IActionResult> DeleteNote(int id) {
 
-            var user = await _userManager.GetUserAsync(User);
+            var user = await userManager.GetUserAsync(User);
 
             if (user == null) {
-                return new JsonFailResult("Bad user!");
+                return new JsonFailResult(sharedLocalizer.GetString("Bad user"));
             }
 
-            var note = await _db.Notes.FirstOrDefaultAsync(n => n.Id == id && n.User == user);
+            var note = await db.Notes.FirstOrDefaultAsync(n => n.Id == id && n.User == user);
 
             if (note == null) {
-                return new JsonFailResult("User don't have note with that id.");
+                return new JsonFailResult(sharedLocalizer.GetString("There no note with this id"));
             }
 
-            _db.Notes.Remove(note);
+            db.Notes.Remove(note);
 
-            await _db.SaveChangesAsync();
+            await db.SaveChangesAsync();
 
             return Json("Ok");
 
