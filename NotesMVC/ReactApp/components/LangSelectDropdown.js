@@ -1,6 +1,3 @@
-import { withLocalize } from 'react-localize-redux'
-import cookies from 'react-cookies'
-
 const LangSelectDropdown = ({ languages, activeLanguage, setActiveLanguage }) => {
 
   let langsHtml = [];
@@ -8,7 +5,7 @@ const LangSelectDropdown = ({ languages, activeLanguage, setActiveLanguage }) =>
   for (let { code, name } of languages) {
 
     langsHtml.push((
-      <a key={code} title={name} onClick={() => { cookies.save('CurrentLang', `c=${code}|uic=${code}`); setActiveLanguage(code); }} className = "dropdown-item" >
+      <a key={code} title={name} onClick={() => setActiveLanguage(code) } className = "dropdown-item" >
         <img className="flag-icon" src={`imgs/${code}.svg`} />
       </a >
     ));
@@ -32,4 +29,4 @@ const LangSelectDropdown = ({ languages, activeLanguage, setActiveLanguage }) =>
 
 }
 
-export default withLocalize(LangSelectDropdown);
+export default LangSelectDropdown;
