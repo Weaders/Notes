@@ -106,3 +106,15 @@ ul.navbar-nav div.dropdown-menu.lang-select {
     border-radius: 0;
     min-width: 50px;
 }
+.site-title {
+    color: white;
+}
+.btn-link {
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+    color: white;
+}
+.label-form {
+    width: 100%;
+}

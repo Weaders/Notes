@@ -39,16 +39,9 @@ namespace NotesMVC {
 
             });
 
-            services.AddLocalization(opts => opts.ResourcesPath = "Resources");
-
             var connectionStr = this.Configuration.GetConnectionString("DefaultConnection");
 
-            services.AddMvc()
-                .AddDataAnnotationsLocalization(opts => {
-                    opts.DataAnnotationLocalizerProvider = (type, factory) =>
-                        factory.Create(typeof(SharedResources));
-                })
-                .AddViewLocalization();
+            services.AddMvc();
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddReact();
@@ -73,21 +66,6 @@ namespace NotesMVC {
 
             });
 
-            services.Configure<RequestLocalizationOptions>(opts => {
-
-                opts.SupportedCultures = opts.SupportedUICultures = new[] {
-                    new CultureInfo("en"),
-                    new CultureInfo("ru")
-                };
-
-                opts.DefaultRequestCulture = new RequestCulture("en");
-
-                var cookieProvider = opts.RequestCultureProviders.OfType<CookieRequestCultureProvider>().First();
-
-                cookieProvider.CookieName = "CurrentLang";
-
-            });
-
             return services.BuildServiceProvider();
 
         }
@@ -105,8 +83,6 @@ namespace NotesMVC {
                 app.UseHsts();
 
             }
-
-            app.UseRequestLocalization(app.ApplicationServices.GetService<IOptions<RequestLocalizationOptions>>().Value);
 
             app.UseReact(config => { });
             app.UseHttpsRedirection();

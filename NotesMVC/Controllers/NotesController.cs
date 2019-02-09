@@ -18,15 +18,13 @@ namespace NotesMVC.Controllers {
         private readonly CryptographManager manager;
         private readonly UserManager<User> userManager;
         private readonly SignInManager<User> signInManager;
-        private readonly IStringLocalizer<SharedResources> sharedLocalizer;
 
-        public NotesController(DefaultContext _db, CryptographManager _manager, UserManager<User> _userManager, SignInManager<User> _signInManager, IStringLocalizer<SharedResources> _sharedLocalizer) {
+        public NotesController(DefaultContext _db, CryptographManager _manager, UserManager<User> _userManager, SignInManager<User> _signInManager) {
 
             userManager = _userManager;
             db = _db;
             manager = _manager;
             signInManager = _signInManager;
-            sharedLocalizer = _sharedLocalizer;
 
         }
 
@@ -68,7 +66,7 @@ namespace NotesMVC.Controllers {
             if (user == null) {
 
                 await this.signInManager.SignOutAsync();
-                return new JsonFailResult(sharedLocalizer.GetString("Bad user"));
+                return new JsonFailResult("Bad user");
 
             }
 
@@ -98,13 +96,13 @@ namespace NotesMVC.Controllers {
             var user = await userManager.GetUserAsync(User);
 
             if (user == null) {
-                return new JsonFailResult(sharedLocalizer.GetString("Bad user"));
+                return new JsonFailResult("Bad user");
             }
 
             var note = await this.db.Notes.FirstOrDefaultAsync((n) => n.Id == noteForm.Id && n.User == user);
 
             if (note == null) {
-                return new JsonFailResult(sharedLocalizer.GetString("There no note with this id"));
+                return new JsonFailResult("There no note with this id");
             } else {
 
                 var newNote = noteForm.ToNote(manager, user);
@@ -134,13 +132,13 @@ namespace NotesMVC.Controllers {
             var user = await userManager.GetUserAsync(User);
 
             if (user == null) {
-                return new JsonFailResult(sharedLocalizer.GetString("Bad user"));
+                return new JsonFailResult("Bad user");
             }
 
             var note = await db.Notes.FirstOrDefaultAsync(n => n.Id == id && n.User == user);
 
             if (note == null) {
-                return new JsonFailResult(sharedLocalizer.GetString("There no note with this id"));
+                return new JsonFailResult("There no note with this id");
             }
 
             db.Notes.Remove(note);

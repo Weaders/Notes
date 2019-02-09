@@ -3,9 +3,18 @@
   "name": "asp.net",
   "private": true,
   "scripts": {
-    "build": "webpack --mode development"
+    "build": "webpack --mode development",
+    "jsCheck": "eslint ReactApp --ext .js --ext .jsx",
+    "jsFix": "eslint ReactApp --ext .js --ext .jsx --fix"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "babel-eslint": "^10.0.1",
+    "eslint": "^5.13.0",
+    "eslint-config-airbnb": "^17.1.0",
+    "eslint-plugin-import": "^2.16.0",
+    "eslint-plugin-jsx-a11y": "^6.2.1",
+    "eslint-plugin-react": "^7.12.4"
+  },
   "dependencies": {
     "@babel/core": "^7.2.0",
     "@babel/polyfill": "^7.0.0",
@@ -16,13 +25,16 @@
     "babel-loader": "^8.0.4",
     "babel-preset-es2015": "^6.24.1",
     "babel-preset-stage-0": "^6.24.1",
+    "history": "^4.7.2",
     "lodash": "^4.17.11",
+    "prop-types": "^15.6.2",
     "query-string": "^6.2.0",
     "react": "^16.6.3",
     "react-cookies": "^0.1.0",
     "react-dom": "^16.7.0",
     "react-localize-redux": "^3.5.2",
     "react-redux": "^6.0.0",
+    "react-router": "^4.3.1",
     "react-router-dom": "^4.3.1",
     "redux": "^4.0.1",
     "redux-logger": "^3.0.6",

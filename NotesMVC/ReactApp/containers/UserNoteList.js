@@ -1,26 +1,17 @@
-import NotesList from '../components/NotesList'
-import { getNotes } from '../actions/notes'
+import { connect } from 'react-redux';
+import NotesList from '../components/NotesList';
+import { getNotes } from '../actions/notes';
 
-import { connect } from 'react-redux'
+const mapStateToProps = state => ({
+  secretCode: state.secretCode,
+  notes: state.notes.notesArray || [],
+  isLoading: state.notes.isLoadNotes,
+});
 
-const mapStateToProps = function (state, ownProps) {
+const mapDispatchToProps = (dispatch, ownProps) => Object.assign({
+  getNotes: () => {
+    dispatch(getNotes());
+  },
+}, ownProps);
 
-    return {
-        secretCode: state.secretCode,
-        notes: state.notes.notesArray,
-        isLoading: state.notes.isLoadNotes
-    };
-
-}
-
-const mapDispatchToProps = (dispatch, ownProps) => {
-
-    return Object.assign({
-        getNotes: () => {
-            dispatch(getNotes());
-        }
-    }, ownProps);
-
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(NotesList)
+export default connect(mapStateToProps, mapDispatchToProps)(NotesList);

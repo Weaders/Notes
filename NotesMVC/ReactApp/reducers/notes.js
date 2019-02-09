@@ -1,145 +1,119 @@
+import _ from 'lodash';
 import {
-    ACTION_NOTES_GET_START,
-    ACTION_NOTES_GET_FAIL,
-    ACTION_NOTES_GET_SUCCESS,
-    ACTION_NOTES_ADD_START,
-    ACTION_NOTES_ADD_FAIL,
-    ACTION_NOTES_ADD_SUCCESS,
-    ACTION_NOTES_REMOVE_START,
-    ACTION_NOTES_REMOVE_FAIL,
-    ACTION_NOTES_REMOVE_SUCCESS,
-    ACTION_NOTES_EDIT_START,
-    ACTION_NOTES_EDIT_FAIL,
-    ACTION_NOTES_EDIT_SUCCESS
-} from './../actions/notes'
+  ACTION_NOTES_GET_START,
+  ACTION_NOTES_GET_FAIL,
+  ACTION_NOTES_GET_SUCCESS,
+  ACTION_NOTES_ADD_START,
+  ACTION_NOTES_ADD_FAIL,
+  ACTION_NOTES_ADD_SUCCESS,
+  ACTION_NOTES_REMOVE_START,
+  ACTION_NOTES_REMOVE_FAIL,
+  ACTION_NOTES_REMOVE_SUCCESS,
+  ACTION_NOTES_EDIT_START,
+  ACTION_NOTES_EDIT_FAIL,
+  ACTION_NOTES_EDIT_SUCCESS,
+} from '../actions/notes';
 
-import _ from 'lodash'
-import NoteItem from '../models/NoteItem';
-
-/**
- * @type {{notesArray: NoteItem[], isLoadNotes: boolean, isLoadAddNote: boolean, errorsOnAdd: Map<string, string>, errorsOnEdit: Map<number, Map<string, string>>, isRemoveLoadIds: number[], isEditLoadIds: number[]}}
- */
 const initialState = {
-    notesArray: [],
-    isLoadNotes: false,
-    isLoadAddNote: false,
-    errorsOnAdd: new Map(),
-    errorsOnEdit: new Map(),
-    isRemoveLoadIds: [],
-    isEditLoadIds: []
+  notesArray: [],
+  isLoadNotes: false,
+  isLoadAddNote: false,
+  reqErrorOnAdd: null,
+  reqErrorOnEdit: new Map(),
+  isRemoveLoadIds: [],
+  isEditLoadIds: [],
 };
 
 export default (state = initialState, action) => {
+  let newState = state;
 
-    switch (action.type) {
+  if (action.type === ACTION_NOTES_GET_START) {
+    newState = {
+      ...state,
+      isLoadNotes: true,
+    };
+  } else if (action.type === ACTION_NOTES_GET_SUCCESS) {
+    newState = {
+      ...state,
+      isLoadNotes: false,
+      notesArray: action.notes,
+    };
+  } else if (action.type === ACTION_NOTES_GET_FAIL) {
+    newState = {
+      ...state,
+      isLoadNotes: false,
+    };
+  } else if (action.type === ACTION_NOTES_ADD_START) {
+    newState = {
+      ...state,
+      isLoadAddNote: true,
+      reqErrorOnAdd: null,
+    };
+  } else if (action.type === ACTION_NOTES_ADD_FAIL) {
+    newState = {
+      ...state,
+      isLoadAddNote: false,
+      reqErrorOnAdd: action.reqError,
+    };
+  } else if (action.type === ACTION_NOTES_ADD_SUCCESS) {
+    newState = {
+      ...state,
+      notesArray: [...state.notesArray, action.newItem],
+    };
+  } else if (action.type === ACTION_NOTES_REMOVE_START) {
+    newState = {
+      ...state,
+      isRemoveLoadIds: [...state.isRemoveLoadIds, action.id],
+    };
+  } else if (action.type === ACTION_NOTES_REMOVE_FAIL) {
+    newState = {
+      ...state,
+      isRemoveLoadIds: _.without(state.isRemoveLoadIds, action.id),
+    };
+  } else if (action.type === ACTION_NOTES_REMOVE_SUCCESS) {
+    const newIds = [...state.isRemoveLoadIds];
 
-        case ACTION_NOTES_GET_START:
-            return {
-                ...state,
-                isLoadNotes: true,
-                errors: []
-            };
-        case ACTION_NOTES_GET_SUCCESS:
-            return {
-                ...state,
-                isLoadNotes: false,
-                notesArray: action.notes,
-                errors: []
-            };
-        case ACTION_NOTES_GET_FAIL:
-            return {
-                ...state,
-                isLoadNotes: false,
-                errors: action.errors
-            };
-        case ACTION_NOTES_ADD_START:
-            return {
-                ...state,
-                isLoadAddNote: true,
-                errorsOnAdd: new Map()
-            }
-        case ACTION_NOTES_ADD_FAIL:
+    _.pull(newIds, action.id);
 
-            return {
-                ...state,
-                isLoadAddNote: false,
-                errorsOnAdd: action.reqError.errors,
-            }
+    const newItems = [...state.notesArray];
 
-        case ACTION_NOTES_ADD_SUCCESS:
-            return {
-                ...state,
-                notesArray: [...state.notesArray, action.newItem]
+    _.remove(newItems, item => item.id === action.id);
 
-            }
-        case ACTION_NOTES_REMOVE_START:
+    newState = {
+      ...state,
+      isRemoveLoadIds: newIds,
+      notesArray: newItems,
+    };
+  } else if (action.type === ACTION_NOTES_EDIT_START) {
+    newState = {
+      ...state,
+      isEditLoadIds: [...state.isEditLoadIds, action.id],
+    };
 
-            return {
-                ...state,
-                isRemoveLoadIds: [...state.isRemoveLoadIds, action.id]
-            }
+    newState.reqErrorOnEdit.delete(action.id);
 
-        case ACTION_NOTES_REMOVE_FAIL:
+    return newState;
+  } else if (action.type === ACTION_NOTES_EDIT_FAIL) {
+    newState = {
+      ...state,
+      isEditLoadIds: _.without(state.isEditLoadIds, action.id),
+    };
 
-            return {
-                ...state,
-                isRemoveLoadIds: _.without(state.isRemoveLoadIds, action.id)
-            };
+    newState.reqErrorOnEdit.set(action.id, action.reqError);
 
-        case ACTION_NOTES_REMOVE_SUCCESS:
+    return newState;
+  } else if (action.type === ACTION_NOTES_EDIT_SUCCESS) {
+    const noteIndex = _.findIndex(state.notesArray, ({ id }) => id === action.item.id);
+    const newNotes = [...state.notesArray];
 
-            let newIds = [...state.isRemoveLoadIds];
+    newNotes[noteIndex] = action.item;
 
-            _.pull(newIds, action.id);
+    newState = {
+      ...state,
+      notesArray: newNotes,
+      isEditLoadIds: _.without(state.isEditLoadIds, action.item.id),
+    };
+  }
 
-            let newItems = [...state.notesArray];
-
-            _.remove(newItems, (item) => item.id === action.id);
-
-            return {
-                ...state,
-                isRemoveLoadIds: newIds,
-                notesArray: newItems
-            };
-
-        case ACTION_NOTES_EDIT_START:
-
-            let newStateEditStart = {
-                ...state,
-                isEditLoadIds: [...state.isEditLoadIds, action.id]
-            };
-
-            newStateEditStart.errorsOnEdit.delete(action.id);
-
-            return newStateEditStart;
-
-        case ACTION_NOTES_EDIT_FAIL:
-
-            let newStateEditFail = {
-                ...state,
-                isEditLoadIds: _.without(state.isEditLoadIds, action.id)
-            };
-
-            newStateEditFail.errorsOnEdit.set(action.id, action.reqError.errors);
-
-            return newStateEditFail;
-
-        case ACTION_NOTES_EDIT_SUCCESS:
-
-            let noteIndex = _.findIndex(state.notesArray, ({ id }) => id == action.item.id);
-            let newNotes = [...state.notesArray];
-
-            newNotes[noteIndex] = action.item;
-
-            return {
-                ...state,
-                notesArray: newNotes,
-                isEditLoadIds: _.without(state.isEditLoadIds, action.item.id)
-            };
-
-        default:
-            return state;
-
-    }
-
-}
+  return newState;
+};

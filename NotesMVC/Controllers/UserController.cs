@@ -13,13 +13,11 @@ namespace NotesMVC.Controllers {
 
         private readonly UserManager<User> usersManager;
         private readonly SignInManager<User> signInManager;
-        private readonly IStringLocalizer<SharedResources> sharedLocalizer;
 
-        public UserController(SignInManager<User> _signInManager, UserManager<User> _usersManager, IStringLocalizer<SharedResources> _sharedLocalize) {
+        public UserController(SignInManager<User> _signInManager, UserManager<User> _usersManager) {
 
             signInManager = _signInManager;
             usersManager = _usersManager;
-            sharedLocalizer = _sharedLocalize;
 
         }
 
@@ -43,11 +41,11 @@ namespace NotesMVC.Controllers {
                         return Json(new UserForOutput(user));
 
                     } else {
-                        ModelState.AddModelError("bad_login", sharedLocalizer.GetString("Bad login or password"));
+                        ModelState.AddModelError("No user pwd and login", "No user pwd and login");
                     }
 
                 } else {
-                    ModelState.AddModelError("bad_login", sharedLocalizer.GetString("Bad login or password"));
+                    ModelState.AddModelError("No user pwd and login", "No user pwd and login");
                 }
 
             }
@@ -87,7 +85,7 @@ namespace NotesMVC.Controllers {
                     }
 
                 } else {
-                    ModelState.AddModelError("exists_user", sharedLocalizer.GetString("User already exists"));
+                    ModelState.AddModelError("exists_user", "User already exists");
                 }
 
             }

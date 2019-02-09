@@ -1,15 +1,8 @@
-import NotesList from '../components/NotesList'
-import { getNotes } from '../actions/notes'
+import { connect } from 'react-redux';
+import Header from '../components/Header';
 
-import { connect } from 'react-redux'
-import Header from './../components/Header'
+const mapStateToProps = state => ({
+  isLogoutShow: !!state.user.userItem,
+});
 
-const mapStateToProps = function (state, ownProps) {
-
-    return {
-        isLogoutShow: !!state.user.userItem
-    };
-
-}
-
-export default connect(mapStateToProps)(Header)
+export default connect(mapStateToProps)(Header);

@@ -7,7 +7,7 @@ const bundleFolder = "./wwwroot/assets/";
 module.exports = {
     mode: 'development',
     entry: [
-        "./ReactApp/index.js"
+        "./ReactApp/index.jsx"
     ],
     devtool: "source-map",
     output: {
@@ -27,6 +27,5 @@ module.exports = {
             }
         ]
     },
-    plugins: [
-    ]
+    resolve: { extensions: [ '.js', '.jsx'] },
 };

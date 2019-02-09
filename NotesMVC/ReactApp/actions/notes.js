@@ -1,5 +1,5 @@
-import RestClient from '../rest/rest-client'
-import NoteItem from '../models/NoteItem'
+import RestClient from '../rest/rest-client';
+import NoteItem from '../models/NoteItem';
 
 export const ACTION_NOTES_GET_START = 'NOTES_GET_START';
 export const ACTION_NOTES_GET_SUCCESS = 'NOTES_GET_SUCCESS';
@@ -19,136 +19,97 @@ export const ACTION_NOTES_REMOVE_SUCCESS = 'NOTES_REMOVE_SUCCESS';
 
 const restClient = new RestClient();
 
-export const getNotes = (secretCode) => {
+export const getNotes = secretCode => async (dispatch) => {
+  dispatch({
+    type: ACTION_NOTES_GET_START,
+  });
 
-    return async (dispatch) => {
+  let notes = [];
 
-        dispatch({
-            type: ACTION_NOTES_GET_START
-        });
+  try {
+    const data = await restClient.get('notes/list', { key: secretCode });
+    notes = data.map(n => new NoteItem(n.id, n.title, n.text));
+  } catch (error) {
+    dispatch({
+      type: ACTION_NOTES_GET_FAIL,
+      error,
+    });
 
-        let notes = [];
+    return;
+  }
 
-        try {
-
-            let data = await restClient.get('notes/list', { key: secretCode });
-            notes = data.map(n => new NoteItem(n.id, n.title, n.text));
-
-        } catch (error) {
-
-            dispatch({
-                type: ACTION_NOTES_GET_FAIL,
-                error
-            });
-
-            return;
-
-        }
-
-        dispatch({
-            type: ACTION_NOTES_GET_SUCCESS,
-            notes
-        });
-
-    };
-
+  dispatch({
+    type: ACTION_NOTES_GET_SUCCESS,
+    notes,
+  });
 };
 
-export const addNote = (title, text, secretCode) => {
-    console.log('tet1');
-    return async (dispatch) => {
+export const addNote = (title, text, secretCode) => (async (dispatch) => {
+  dispatch({ type: ACTION_NOTES_ADD_START });
 
-        console.log('tet');
+  let data = null;
 
-        dispatch({ type: ACTION_NOTES_ADD_START });
+  try {
+    data = await restClient.post('notes/add', {
+      text,
+      title,
+      secretKey: secretCode,
+    });
+  } catch (reqError) {
+    dispatch({
+      type: ACTION_NOTES_ADD_FAIL,
+      reqError,
+    });
 
-        let data = null;
+    return;
+  }
 
-        try {
+  const newItem = new NoteItem(data.id, data.title, data.text);
 
-            data = await restClient.post('notes/add', {
-                text: text,
-                title: title,
-                secretKey: secretCode
-            });
-
-        } catch (reqError) {
-
-            dispatch({
-                type: ACTION_NOTES_ADD_FAIL,
-                reqError
-            });
-
-            return;
-
-        }
-
-        let newItem = new NoteItem(data.id, data.title, data.text);
-
-        dispatch({
-            type: ACTION_NOTES_ADD_SUCCESS,
-            newItem
-        });
+  dispatch({
+    type: ACTION_NOTES_ADD_SUCCESS,
+    newItem,
+  });
+});
 
 
-    };
+export const editNote = (id, title, text, secretCode) => async (dispatch) => {
+  let data = null;
 
-}
+  dispatch({ type: ACTION_NOTES_EDIT_START, id });
 
-export const editNote = (id, title, text, secretCode) => {
+  try {
+    data = await restClient.post(`notes/${id}/edit`, {
+      text,
+      title,
+      id,
+      secretKey: secretCode,
+    });
+  } catch (reqError) {
+    dispatch({ type: ACTION_NOTES_EDIT_FAIL, reqError, id });
+    return;
+  }
 
-    return async (dispatch) => {
+  dispatch({
+    type: ACTION_NOTES_EDIT_SUCCESS,
+    item: new NoteItem(data.id, data.title, data.text),
+  });
+};
 
-        let data = null;
+export const removeNote = id => async (dispatch) => {
+  dispatch({ type: ACTION_NOTES_REMOVE_START, id });
 
-        dispatch({ type: ACTION_NOTES_EDIT_START, id });
+  try {
+    await restClient.delete(`notes/${id}`);
+  } catch (reqError) {
+    dispatch({
+      type: ACTION_NOTES_REMOVE_FAIL,
+      id,
+    });
+  }
 
-        try {
-
-            data = await restClient.post(`notes/${id}/edit`, {
-                text: text,
-                title: title,
-                id: id,
-                secretKey: secretCode
-            });
-
-
-        } catch (reqError) {
-
-            dispatch({ type: ACTION_NOTES_EDIT_FAIL, reqError, id });
-            return;
-
-        }
-
-        dispatch({
-            type: ACTION_NOTES_EDIT_SUCCESS,
-            item: new NoteItem(data.id, data.title, data.text)
-        });
-
-    };
-
-}
-
-export const removeNote = (id) => {
-
-    return async (dispatch) => {
-
-        dispatch({ type: ACTION_NOTES_REMOVE_START, id })
-
-        try {
-            await restClient.delete(`notes/${id}`);
-        } catch (reqError) {
-            dispatch({
-                type: ACTION_NOTES_REMOVE_FAIL,
-                id
-            });
-        }
-
-        dispatch({
-            type: ACTION_NOTES_REMOVE_SUCCESS,
-            id
-        });
-
-    };
-
-}
+  dispatch({
+    type: ACTION_NOTES_REMOVE_SUCCESS,
+    id,
+  });
+};

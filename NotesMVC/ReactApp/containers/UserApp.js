@@ -1,27 +1,19 @@
-import App from '../components/App'
-import { getCurrent } from '../actions/user'
 
-import { withRouter } from 'react-router-dom'
-import { withLocalize } from 'react-localize-redux'
+import { withRouter } from 'react-router-dom';
+import { withLocalize } from 'react-localize-redux';
 
-import { connect } from 'react-redux'
+import { connect } from 'react-redux';
+import { getCurrent } from '../actions/user';
+import App from '../components/App';
 
-const mapStateToProps = function (state, ownProps) {
+const mapStateToProps = state => ({
+  isLoading: state.user.isLoading,
+});
 
-    return {
-        isLoading: state.user.isLoading
-    };
+const mapDispatchToProps = (dispatch, ownProps) => Object.assign({
+  onStart: () => {
+    dispatch(getCurrent());
+  },
+}, ownProps);
 
-}
-
-const mapDispatchToProps = (dispatch, ownProps) => {
-
-    return Object.assign({
-        onStart: () => {
-            dispatch(getCurrent());
-        }
-    }, ownProps);
-
-}
-
-export default withLocalize(withRouter(connect(mapStateToProps, mapDispatchToProps)(App)))
+export default withLocalize(withRouter(connect(mapStateToProps, mapDispatchToProps)(App)));

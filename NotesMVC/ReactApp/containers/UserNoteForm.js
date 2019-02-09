@@ -1,41 +1,37 @@
-import NoteForm from '../components/NoteForm'
-import { addNote, editNote } from '../actions/notes'
+import { connect } from 'react-redux';
+import NoteForm from '../components/NoteForm';
+import { addNote, editNote } from '../actions/notes';
 
-import { connect } from 'react-redux'
+const mapStateToProps = (state, ownProps) => {
+  const props = {
+    secretCode: state.secretCode,
+    errors: new Map(),
+  };
 
-const mapStateToProps = function (state, ownProps) {
+  if (ownProps.id) {
+    const reqError = state.notes.reqErrorOnEdit.get(ownProps.id);
 
-    let props = {
-        secretCode: state.secretCode
-    };
-
-    if (ownProps.id) {
-        props.errors = state.notes.errorsOnEdit.get(ownProps.id) || new Map()
-    } else {
-        props.errors = state.notes.errorsOnAdd;
+    if (reqError) {
+      props.errors = reqError.getTranslatedErrors(state.localize);
     }
+  } else if (state.notes.reqErrorOnAdd) {
+    props.errors = state.notes.reqErrorOnAdd.getTranslatedErrors(state.localize);
+  }
 
-    return props;
+  return props;
+};
 
-}
-
-const mapDispatchToProps = (dispatch, ownProps) => {
-
-    return Object.assign({
-        /**
+const mapDispatchToProps = (dispatch, ownProps) => Object.assign({
+  /**
          * @param {NoteForm} form
          */
-        onFormSend: (form) => {
-            if (form.props.id) {
-                dispatch(editNote(form.props.id, form.state.title, form.state.text, form.props.secretCode));
-            } else {
-                dispatch(addNote(form.state.title, form.state.text, form.props.secretCode));
-            }
-            
-            
-        }
-    }, ownProps);
+  onFormSend: (form) => {
+    if (form.props.id) {
+      dispatch(editNote(form.props.id, form.state.title, form.state.text, form.props.secretCode));
+    } else {
+      dispatch(addNote(form.state.title, form.state.text, form.props.secretCode));
+    }
+  },
+}, ownProps);
 
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(NoteForm)
+export default connect(mapStateToProps, mapDispatchToProps)(NoteForm);

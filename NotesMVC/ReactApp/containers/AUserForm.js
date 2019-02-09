@@ -1,30 +1,29 @@
-import UserFrom from '../components/UserForm'
-import { login, register } from '../actions/user'
+import { connect } from 'react-redux';
+import UserFrom from '../components/UserForm';
+import { login, register } from '../actions/user';
 
-import { connect } from 'react-redux'
+const mapStateToProps = (state) => {
+  let errors = new Map();
 
-const mapStateToProps = function(state, ownProps) {
+  if (state.user.reqError) {
+    errors = state.user.reqError.getTranslatedErrors(state.localize);
+  }
 
-    return {
-        errors: state.user.errors || new Map(),
-        isLoading: state.user.isLoading || false
-    };
+  return {
+    errors,
+    isLoading: state.user.isLoading || false,
+  };
+};
 
-}
+const mapDispatchToProps = (dispatch, ownProps) => Object.assign({
+  onLoginClick: (user, pwd) => {
+    dispatch(login(user, pwd));
+  },
+  onRegisterClick: (user, pwd) => {
+    dispatch(register(user, pwd));
+  },
+}, ownProps);
 
-const mapDispatchToProps = (dispatch, ownProps) => {
+const AUserForm = connect(mapStateToProps, mapDispatchToProps)(UserFrom);
 
-    return Object.assign({
-        onLoginClick: (userForm) => {
-            dispatch(login(userForm.state.user, userForm.state.pwd));
-        },
-        onRegisterClick: (userForm) => {
-            dispatch(register(userForm.state.user, userForm.state.pwd));
-        }
-    }, ownProps);
-
-}
-
-const AUserForm = connect(mapStateToProps, mapDispatchToProps)(UserFrom)
-
-export default AUserForm
+export default AUserForm;
