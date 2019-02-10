@@ -62,13 +62,13 @@ class NoteLine extends React.Component {
 
 
     const noteBodyId = `note-body-${noteItem.id}`;
-    const cardClasses = 'card note-line';
-    const cardBody = 'card-body collapse multi-collapse';
+    let cardClasses = 'card note-line';
+    let cardBody = 'card-body collapse multi-collapse';
     let loadingBox = '';
 
     if (isExpanded) {
-      // cardClasses += ' expanded';
-      // cardBody += ' show';
+      cardClasses += ' expanded';
+      cardBody += ' show';
 
       if (isLoading) {
         loadingBox = <LoadingBox />;

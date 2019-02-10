@@ -7,7 +7,6 @@ using NotesMVC.Controllers;
 using NotesMVC.Models;
 using NotesMVC.Output;
 using NotesMVC.ViewModels;
-using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -81,8 +80,8 @@ namespace NotesMVC.tests {
             var pwdErrors = ((JsonFailResult)resultFailPwd).Value as ErrorsHandler;
             var pwdUserName = ((JsonFailResult)resultFailUserName).Value as ErrorsHandler;
 
-            Assert.True(pwdErrors.Errors.ContainsKey("bad_login"));
-            Assert.True(pwdUserName.Errors.ContainsKey("bad_login"));
+            Assert.True(pwdErrors.Errors.ContainsKey("No user pwd and login"));
+            Assert.True(pwdUserName.Errors.ContainsKey("No user pwd and login"));
 
         }
 
@@ -109,7 +108,7 @@ namespace NotesMVC.tests {
 
             userManager.Setup(u => u.FindByNameAsync(It.Is<string>(str => str == users[0].UserName))).Returns(Task.FromResult(users[0]));
             userManager.Setup(u => u.CheckPasswordAsync(It.IsAny<User>(), It.Is<string>(str => str == pwd))).Returns(Task.FromResult(true));
-            userManager.Setup(u => u.CreateAsync(It.IsAny<User>())).Returns(Task.FromResult(IdentityResult.Success));
+            userManager.Setup(u => u.CreateAsync(It.IsAny<User>(), It.IsAny<string>())).Returns(Task.FromResult(IdentityResult.Success));
 
             var ctrl = this.GetUserController(null, userManager.Object);
 
@@ -145,7 +144,7 @@ namespace NotesMVC.tests {
 
             var existsUserError = ((JsonFailResult)resultFailExists).Value as ErrorsHandler;
 
-            Assert.True(existsUserError.Errors.ContainsKey("exists_user"));
+            Assert.True(existsUserError.Errors.ContainsKey("User already exists"));
 
         }
 
@@ -163,7 +162,10 @@ namespace NotesMVC.tests {
                 new HttpContextAccessor { HttpContext = httpContext.Object },
                 new Mock<IUserClaimsPrincipalFactory<User>>().Object, null, null, null);
 
-            return new UserController(signInManager.Object, userManager) {
+            var outputFactory = new OutputFactory();
+            var modelsFactory = new ModelsFactory();
+
+            return new UserController(signInManager.Object, userManager, outputFactory, modelsFactory) {
                 ControllerContext = new ControllerContext() { HttpContext = httpContext.Object },
                 ObjectValidator = MockHelper.GetObjectValidator()
             };

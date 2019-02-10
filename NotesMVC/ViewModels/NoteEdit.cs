@@ -32,16 +32,18 @@ namespace NotesMVC.ViewModels {
         /// <param name="manager">For get Cryptographer</param>
         /// <param name="user">Owner of note</param>
         /// <returns></returns>
-        public Note ToNote(CryptographManager manager, User user) {
+        public Note ToNote(CryptographManager manager, User user, IModelsFactory modelsFactory) {
 
             var encoder = manager.Get(CryptographType.Get(AlgorithName));
 
-            return new Note() {
-                Title = encoder.Encrypt(Title, SecretKey),
-                Text = encoder.Encrypt(Text, SecretKey),
-                User = user,
-                CryptoName = AlgorithName
-            };
+            var note = modelsFactory.CreateNote();
+
+            note.Title = encoder.Encrypt(Title, SecretKey);
+            note.Text = encoder.Encrypt(Text, SecretKey);
+            note.User = user;
+            note.CryptoName = AlgorithName;
+
+            return note;
 
         }
 

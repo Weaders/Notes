@@ -496,8 +496,10 @@ namespace NotesMVC.tests {
                 new Mock<IUserClaimsPrincipalFactory<User>>().Object, null, null, null);
 
             var manager = new CryptographManager();
+            var modelsFactory = new ModelsFactory();
+            var outputFactory = new OutputFactory();
 
-            return new NotesController(db.Object, manager, userManager.Object, signInManager.Object) {
+            return new NotesController(db.Object, manager, userManager.Object, signInManager.Object, outputFactory, modelsFactory) {
                 ControllerContext = new ControllerContext() { HttpContext = httpContext.Object },
                 ObjectValidator = MockHelper.GetObjectValidator()
             };

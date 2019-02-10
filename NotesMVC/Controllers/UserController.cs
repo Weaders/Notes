@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Localization;
 using NotesMVC.Models;
 using NotesMVC.Output;
 using NotesMVC.ViewModels;
@@ -13,11 +12,15 @@ namespace NotesMVC.Controllers {
 
         private readonly UserManager<User> usersManager;
         private readonly SignInManager<User> signInManager;
+        private readonly IOutputFactory outputFactory;
+        private readonly IModelsFactory modelsFactory;
 
-        public UserController(SignInManager<User> _signInManager, UserManager<User> _usersManager) {
+        public UserController(SignInManager<User> _signInManager, UserManager<User> _usersManager, IOutputFactory _outputFactory, IModelsFactory _modelsFactory) {
 
             signInManager = _signInManager;
             usersManager = _usersManager;
+            outputFactory = _outputFactory;
+            modelsFactory = _modelsFactory;
 
         }
 
@@ -38,7 +41,7 @@ namespace NotesMVC.Controllers {
 
                         await signInManager.SignInAsync(user, true);
 
-                        return Json(new UserForOutput(user));
+                        return Json(outputFactory.CreateUser(user));
 
                     } else {
                         ModelState.AddModelError("No user pwd and login", "No user pwd and login");
@@ -50,7 +53,7 @@ namespace NotesMVC.Controllers {
 
             }
 
-            return new JsonFailResult(ModelState);
+            return outputFactory.CreateJsonFail(ModelState);
 
         }
 
@@ -63,18 +66,15 @@ namespace NotesMVC.Controllers {
 
                 if (user == null) {
 
-                    var newUser = new User {
-                        UserName = model.User
-                    };
+                    var newUser = modelsFactory.CreateUser();
+                    newUser.UserName = model.User;
 
-                    newUser.PasswordHash = usersManager.PasswordHasher.HashPassword(newUser, model.Password);
-
-                    var result = await usersManager.CreateAsync(newUser);
+                    var result = await usersManager.CreateAsync(newUser, model.Password);
 
                     if (result.Succeeded) {
 
                         await signInManager.SignInAsync(newUser, true);
-                        return Json(new UserForOutput(newUser));
+                        return Json(outputFactory.CreateUser(newUser));
 
                     } else {
 
@@ -85,12 +85,12 @@ namespace NotesMVC.Controllers {
                     }
 
                 } else {
-                    ModelState.AddModelError("exists_user", "User already exists");
+                    ModelState.AddModelError("User already exists", "User already exists");
                 }
 
             }
 
-            return new JsonFailResult(ModelState);
+            return outputFactory.CreateJsonFail(ModelState);
 
         }
 
@@ -100,7 +100,7 @@ namespace NotesMVC.Controllers {
         public async Task<IActionResult> GetCurrentUser() {
 
             if (signInManager.IsSignedIn(User)) {
-                return Json(new UserForOutput(await usersManager.GetUserAsync(User)));
+                return Json(outputFactory.CreateUser(await usersManager.GetUserAsync(User)));
             } else {
                 return Json(null);
             }
@@ -117,6 +117,6 @@ namespace NotesMVC.Controllers {
 
         }
 
-
     }
+
 }

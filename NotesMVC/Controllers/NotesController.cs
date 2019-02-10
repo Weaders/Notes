@@ -18,13 +18,20 @@ namespace NotesMVC.Controllers {
         private readonly CryptographManager manager;
         private readonly UserManager<User> userManager;
         private readonly SignInManager<User> signInManager;
+        private readonly IOutputFactory outputFactory;
+        private readonly IModelsFactory modelsFactory;
 
-        public NotesController(DefaultContext _db, CryptographManager _manager, UserManager<User> _userManager, SignInManager<User> _signInManager) {
+        public NotesController(DefaultContext _db, CryptographManager _manager, 
+            UserManager<User> _userManager, SignInManager<User> _signInManager, 
+            IOutputFactory _outputFactory, IModelsFactory _modelsFactory) 
+        {
 
             userManager = _userManager;
             db = _db;
             manager = _manager;
             signInManager = _signInManager;
+            outputFactory = _outputFactory;
+            modelsFactory = _modelsFactory;
 
         }
 
@@ -40,7 +47,7 @@ namespace NotesMVC.Controllers {
 
             var notesRdy = db.Notes
                 .Where(n => n.User == user)
-                .Select(n => new NoteForOutput(n, manager, key))
+                .Select(n => outputFactory.CreateNote(n, manager, key))
                 .ToArray();
 
             return Json(notesRdy);
@@ -58,7 +65,7 @@ namespace NotesMVC.Controllers {
         public async Task<IActionResult> AddNote([FromBody]NoteAdd noteModel) {
 
             if (!ModelState.IsValid) {
-                return new JsonFailResult(ModelState);
+                return outputFactory.CreateJsonFail(ModelState);
             }
 
             var user = await userManager.GetUserAsync(User);
@@ -66,16 +73,16 @@ namespace NotesMVC.Controllers {
             if (user == null) {
 
                 await this.signInManager.SignOutAsync();
-                return new JsonFailResult("Bad user");
+                return outputFactory.CreateJsonFail("Bad user");
 
             }
 
-            var note = noteModel.ToNote(manager, user);
+            var note = noteModel.ToNote(manager, user, modelsFactory);
 
             await db.AddAsync(note);
             await db.SaveChangesAsync();
 
-            return Json(new NoteForOutput(note, manager, noteModel.SecretKey));
+            return Json(outputFactory.CreateNote(note, manager, noteModel.SecretKey));
 
         }
 
@@ -90,22 +97,22 @@ namespace NotesMVC.Controllers {
         public async Task<IActionResult> EditNote([FromBody]NoteEdit noteForm) {
 
             if (!ModelState.IsValid) {
-                return new JsonFailResult(ModelState);
+                return outputFactory.CreateJsonFail(ModelState);
             }
 
             var user = await userManager.GetUserAsync(User);
 
             if (user == null) {
-                return new JsonFailResult("Bad user");
+                return outputFactory.CreateJsonFail("Bad user");
             }
 
             var note = await this.db.Notes.FirstOrDefaultAsync((n) => n.Id == noteForm.Id && n.User == user);
 
             if (note == null) {
-                return new JsonFailResult("There no note with this id");
+                return outputFactory.CreateJsonFail("There no note with this id");
             } else {
 
-                var newNote = noteForm.ToNote(manager, user);
+                var newNote = noteForm.ToNote(manager, user, modelsFactory);
 
                 note.Text = newNote.Text;
                 note.Title = newNote.Title;
@@ -114,7 +121,7 @@ namespace NotesMVC.Controllers {
                 db.Notes.Update(note);
                 await db.SaveChangesAsync();
 
-                return Json(new NoteForOutput(note, manager, noteForm.SecretKey));
+                return Json(outputFactory.CreateNote(note, manager, noteForm.SecretKey));
             }
 
         }
@@ -132,13 +139,13 @@ namespace NotesMVC.Controllers {
             var user = await userManager.GetUserAsync(User);
 
             if (user == null) {
-                return new JsonFailResult("Bad user");
+                return outputFactory.CreateJsonFail("Bad user");
             }
 
             var note = await db.Notes.FirstOrDefaultAsync(n => n.Id == id && n.User == user);
 
             if (note == null) {
-                return new JsonFailResult("There no note with this id");
+                return outputFactory.CreateJsonFail("There no note with this id");
             }
 
             db.Notes.Remove(note);

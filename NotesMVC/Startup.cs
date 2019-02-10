@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NotesMVC.Models;
+using NotesMVC.Output;
 using NotesMVC.Services.Encrypter;
 using React.AspNet;
 using System;
@@ -44,9 +45,11 @@ namespace NotesMVC {
             services.AddMvc();
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-            services.AddReact();
-
+            services.AddSingleton<IOutputFactory, OutputFactory>();
+            services.AddSingleton<IModelsFactory, ModelsFactory>();
             services.AddSingleton<CryptographManager>();
+
+            services.AddReact();
 
             services.AddIdentity<User, IdentityRole>(o => {
                 o.Password.RequireDigit = false;
