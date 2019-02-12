@@ -11,7 +11,7 @@
   "Text": "Text",
   "Edit": "Edit",
   "No user pwd and login": "User with this login and password not exists",
-  "Exists user": "User alredy exists",
+  "User already exists": "User alredy exists",
   "Algorithm name required": "Algorithnm name required",
   "Bad login or password": "Bad login or password",
   "Bad user": "Bad user",
@@ -21,5 +21,5 @@
   "Secret key required": "Secret key required",
   "Text Required": "Text Required",
   "There no note with this id": "There no note with this id",
-	"Title Required": "Title Required"
+  "Title Required": "Title Required"
 }

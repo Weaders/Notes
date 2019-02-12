@@ -1,8 +1,7 @@
 #!/bin/bash
 
 set -e
-run_cmd="dotnet NotesMVC.dll --server.urls http://*:80"
-
+run_cmd="dotnet NotesMVC.dll --server.urls http://*:80 --launch-profile NotesMVCProd"
 cd /src/NotesMVC
 
 until dotnet ef database update; do
@@ -13,4 +12,4 @@ done
 cd /app
 
 echo "SQL server is up";
-exec $run_cmd
+exec $run_cmd;

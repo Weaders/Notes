@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using NotesMVC.Middleware;
 using NotesMVC.Models;
 using NotesMVC.Output;
 using NotesMVC.Services.Encrypter;
@@ -53,6 +54,9 @@ namespace NotesMVC {
 
             services.AddIdentity<User, IdentityRole>(o => {
                 o.Password.RequireDigit = false;
+                o.Password.RequiredLength = 1;
+                o.Password.RequireNonAlphanumeric = false;
+                o.Password.RequireUppercase = false;
             })
             .AddEntityFrameworkStores<DefaultContext>();
 
@@ -93,9 +97,12 @@ namespace NotesMVC {
             app.UseCookiePolicy();
             app.UseAuthentication();
 
+            app.UseMiddleware<ReqTimer>();
+
             app.UseMvc(routes => {
                 routes.MapRoute("default", "{controller=User}/{action=LoginForm}");
             });
         }
+
     }
 }
