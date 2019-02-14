@@ -7,7 +7,7 @@ namespace NotesMVC.Output {
 
         UserForOutput CreateUser(User user);
 
-        NoteForOutput CreateNote(Note note, CryptographManager manager, string secretCode);
+        NoteForOutput CreateNote(Note note, string secretCode);
 
         JsonFailResult CreateJsonFail(string error);
 

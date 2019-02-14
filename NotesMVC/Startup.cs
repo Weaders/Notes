@@ -2,20 +2,17 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using NotesMVC.Middleware;
 using NotesMVC.Models;
 using NotesMVC.Output;
+using NotesMVC.Services;
 using NotesMVC.Services.Encrypter;
 using React.AspNet;
 using System;
-using System.Globalization;
-using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -23,12 +20,12 @@ namespace NotesMVC {
 
     public class Startup {
 
-        public Startup(IConfiguration configuration, ILogger<Startup> logger) {
+        public Startup(IConfiguration configuration, ILogger<Startup> _logger) {
             Configuration = configuration;
-            _logger = logger;
+            logger = _logger;
         }
 
-        public ILogger<Startup> _logger;
+        public ILogger<Startup> logger;
 
         public IConfiguration Configuration { get; }
 
@@ -50,6 +47,9 @@ namespace NotesMVC {
             services.AddSingleton<IModelsFactory, ModelsFactory>();
             services.AddSingleton<CryptographManager>();
 
+            services.AddTransient<IUserService, UserService>();
+            services.AddTransient<INotesManager, NotesManager>();
+
             services.AddReact();
 
             services.AddIdentity<User, IdentityRole>(o => {
@@ -67,6 +67,13 @@ namespace NotesMVC {
                 opts.Events.OnRedirectToLogin = ((ctx) => { // Don't redirect on fail authorize
 
                     ctx.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                    return Task.CompletedTask;
+
+                });
+
+                opts.Events.OnRedirectToAccessDenied = ((ctx) => { // Don't redirect on access denied
+
+                    ctx.Response.StatusCode = (int)HttpStatusCode.Forbidden;
                     return Task.CompletedTask;
 
                 });
@@ -99,9 +106,50 @@ namespace NotesMVC {
 
             app.UseMiddleware<ReqTimer>();
 
+            CreateDefaultUser(app.ApplicationServices);
+
             app.UseMvc(routes => {
-                routes.MapRoute("default", "{controller=User}/{action=LoginForm}");
+
+                routes.MapRoute(
+                    name: "default",
+                    template: "{controller=User}/{action=LoginForm}"
+                );
+
+                routes.MapRoute(
+                    name: "areas",
+                    template: "{area:exists}/{controller}/{action}"
+                );
+
             });
+
+        }
+
+        private async void CreateDefaultUser(IServiceProvider services) {
+
+            logger.LogInformation("Start create default user");
+
+            var userMng = services.GetService<UserManager<User>>();
+            var userCnfgSection = Configuration.GetSection("UserSettings");
+
+            var userData = new User {
+                UserName = userCnfgSection["Login"],
+                Email = userCnfgSection["Email"]
+            };
+
+            if ((await userMng.FindByEmailAsync(userData.Email)) == null) {
+
+                var userCreate = await userMng.CreateAsync(userData, userCnfgSection["Pwd"]);
+
+                if (userCreate.Succeeded) {
+                    await userMng.AddToRoleAsync(userData, "Admin");
+                } else {
+                    logger.LogWarning("Can not create default user");
+                }
+
+            } else {
+                logger.LogInformation("Default user already exists");
+            }
+
         }
 
     }

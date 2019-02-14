@@ -6,6 +6,8 @@ using Moq;
 using NotesMVC.Controllers;
 using NotesMVC.Models;
 using NotesMVC.Output;
+using NotesMVC.Services;
+using NotesMVC.Services.Encrypter;
 using NotesMVC.ViewModels;
 using System.Threading.Tasks;
 using Xunit;
@@ -162,10 +164,12 @@ namespace NotesMVC.tests {
                 new HttpContextAccessor { HttpContext = httpContext.Object },
                 new Mock<IUserClaimsPrincipalFactory<User>>().Object, null, null, null);
 
-            var outputFactory = new OutputFactory();
+            var manager = new CryptographManager();
+            var outputFactory = new OutputFactory(manager);
             var modelsFactory = new ModelsFactory();
+            var userService = new UserService(userManager, signInManager.Object);
 
-            return new UserController(signInManager.Object, userManager, outputFactory, modelsFactory) {
+            return new UserController(signInManager.Object, userManager, outputFactory, userService) {
                 ControllerContext = new ControllerContext() { HttpContext = httpContext.Object },
                 ObjectValidator = MockHelper.GetObjectValidator()
             };

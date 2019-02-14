@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 namespace NotesMVC.Middleware {
     public class ReqTimer {
 
-        private readonly RequestDelegate next;
+        private readonly RequestDelegate _next;
 
         public ReqTimer(RequestDelegate request) {
-            next = request;
+            _next = request;
         }
 
         public async Task Invoke(HttpContext context) {
@@ -26,7 +26,7 @@ namespace NotesMVC.Middleware {
 
             }, context);
 
-            await next.Invoke(context);
+            await _next.Invoke(context);
 
         }
 

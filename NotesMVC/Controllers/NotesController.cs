@@ -1,10 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Localization;
 using NotesMVC.Models;
 using NotesMVC.Output;
+using NotesMVC.Services;
 using NotesMVC.Services.Encrypter;
 using NotesMVC.ViewModels;
 using System.Linq;
@@ -14,24 +13,15 @@ namespace NotesMVC.Controllers {
 
     public class NotesController : Controller {
 
-        private readonly DefaultContext db;
-        private readonly CryptographManager manager;
-        private readonly UserManager<User> userManager;
-        private readonly SignInManager<User> signInManager;
-        private readonly IOutputFactory outputFactory;
-        private readonly IModelsFactory modelsFactory;
+        private readonly UserManager<User> _userManager;
+        private readonly IOutputFactory _outputFactory;
+        private readonly INotesManager _notesMng;
 
-        public NotesController(DefaultContext _db, CryptographManager _manager, 
-            UserManager<User> _userManager, SignInManager<User> _signInManager, 
-            IOutputFactory _outputFactory, IModelsFactory _modelsFactory) 
-        {
+        public NotesController(UserManager<User> userManager, IOutputFactory outputFactory, INotesManager notesMng) {
 
-            userManager = _userManager;
-            db = _db;
-            manager = _manager;
-            signInManager = _signInManager;
-            outputFactory = _outputFactory;
-            modelsFactory = _modelsFactory;
+            _userManager = userManager;
+            _outputFactory = outputFactory;
+            _notesMng = notesMng;
 
         }
 
@@ -42,15 +32,10 @@ namespace NotesMVC.Controllers {
         [Authorize]
         public async Task<IActionResult> List([FromQuery]string key) {
 
-            var cryptographer = manager.Get(CryptographType.AES);
-            var user = await userManager.GetUserAsync(User);
+            var user = await _userManager.GetUserAsync(User);
+            var notes = await _notesMng.NotesForUser(user);
 
-            var notesRdy = db.Notes
-                .Where(n => n.User == user)
-                .Select(n => outputFactory.CreateNote(n, manager, key))
-                .ToArray();
-
-            return Json(notesRdy);
+            return Json(notes.Select(n => _outputFactory.CreateNote(n, key)));
 
         }
 
@@ -65,24 +50,22 @@ namespace NotesMVC.Controllers {
         public async Task<IActionResult> AddNote([FromBody]NoteAdd noteModel) {
 
             if (!ModelState.IsValid) {
-                return outputFactory.CreateJsonFail(ModelState);
+                return _outputFactory.CreateJsonFail(ModelState);
             }
 
-            var user = await userManager.GetUserAsync(User);
+            var user = await _userManager.GetUserAsync(User);
+            var addValid = _notesMng.ValidateAddNote(noteModel, user);
 
-            if (user == null) {
+            if (addValid.IsSuccess) {
 
-                await this.signInManager.SignOutAsync();
-                return outputFactory.CreateJsonFail("Bad user");
+                var note = await _notesMng.AddNote(noteModel, user);
+                return Json(_outputFactory.CreateNote(note, noteModel.SecretKey));
 
+            } else {
+
+                addValid.ErrorsToModelState(ModelState);
+                return Json(_outputFactory.CreateJsonFail(ModelState));
             }
-
-            var note = noteModel.ToNote(manager, user, modelsFactory);
-
-            await db.AddAsync(note);
-            await db.SaveChangesAsync();
-
-            return Json(outputFactory.CreateNote(note, manager, noteModel.SecretKey));
 
         }
 
@@ -97,31 +80,23 @@ namespace NotesMVC.Controllers {
         public async Task<IActionResult> EditNote([FromBody]NoteEdit noteForm) {
 
             if (!ModelState.IsValid) {
-                return outputFactory.CreateJsonFail(ModelState);
+                return _outputFactory.CreateJsonFail(ModelState);
             }
 
-            var user = await userManager.GetUserAsync(User);
+            var user = await _userManager.GetUserAsync(User);
 
-            if (user == null) {
-                return outputFactory.CreateJsonFail("Bad user");
-            }
+            var editValid = await _notesMng.ValidateEditNote(noteForm, user);
 
-            var note = await this.db.Notes.FirstOrDefaultAsync((n) => n.Id == noteForm.Id && n.User == user);
+            if (editValid.IsSuccess) {
 
-            if (note == null) {
-                return outputFactory.CreateJsonFail("There no note with this id");
+                var editedNote = await _notesMng.EditeNote(editValid.NoteForEdit, noteForm, user);
+                return Json(_outputFactory.CreateNote(editedNote, noteForm.SecretKey));
+
             } else {
 
-                var newNote = noteForm.ToNote(manager, user, modelsFactory);
+                editValid.ErrorsToModelState(ModelState);
+                return _outputFactory.CreateJsonFail(ModelState);
 
-                note.Text = newNote.Text;
-                note.Title = newNote.Title;
-                note.CryptoName = newNote.CryptoName;
-
-                db.Notes.Update(note);
-                await db.SaveChangesAsync();
-
-                return Json(outputFactory.CreateNote(note, manager, noteForm.SecretKey));
             }
 
         }
@@ -136,23 +111,24 @@ namespace NotesMVC.Controllers {
         [Route("notes/{id:int}")]
         public async Task<IActionResult> DeleteNote(int id) {
 
-            var user = await userManager.GetUserAsync(User);
-
-            if (user == null) {
-                return outputFactory.CreateJsonFail("Bad user");
+            if (!ModelState.IsValid) {
+                return _outputFactory.CreateJsonFail(ModelState);
             }
 
-            var note = await db.Notes.FirstOrDefaultAsync(n => n.Id == id && n.User == user);
+            var user = await _userManager.GetUserAsync(User);
+            var delValid = await _notesMng.ValidateDeleteNote(id, user);
 
-            if (note == null) {
-                return outputFactory.CreateJsonFail("There no note with this id");
+            if (delValid.IsSuccess) {
+
+                var deleted = await _notesMng.RemoveNote(delValid.NoteForRemove);
+                return Json("Ok");
+
+            } else {
+
+                delValid.ErrorsToModelState(ModelState);
+                return _outputFactory.CreateJsonFail(ModelState);
+
             }
-
-            db.Notes.Remove(note);
-
-            await db.SaveChangesAsync();
-
-            return Json("Ok");
 
         }
 

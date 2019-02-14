@@ -6,10 +6,13 @@ using Moq;
 using NotesMVC.Controllers;
 using NotesMVC.Models;
 using NotesMVC.Output;
+using NotesMVC.Services;
 using NotesMVC.Services.Encrypter;
 using NotesMVC.ViewModels;
+using System.Collections.Generic;
 using System.Security.Claims;
 using Xunit;
+using System.Linq;
 
 namespace NotesMVC.tests {
 
@@ -49,7 +52,7 @@ namespace NotesMVC.tests {
 
             ////Assert
             Assert.Null(jsonResult.StatusCode);
-            Assert.Equal((jsonResult.Value as NoteForOutput[]).Length, notesData.Length);
+            Assert.Equal((jsonResult.Value as IEnumerable<NoteForOutput>).Count(), notesData.Length);
 
         }
 
@@ -497,9 +500,10 @@ namespace NotesMVC.tests {
 
             var manager = new CryptographManager();
             var modelsFactory = new ModelsFactory();
-            var outputFactory = new OutputFactory();
+            var outputFactory = new OutputFactory(manager);
+            var notesManager = new NotesManager(db.Object, manager, modelsFactory, userManager.Object);
 
-            return new NotesController(db.Object, manager, userManager.Object, signInManager.Object, outputFactory, modelsFactory) {
+            return new NotesController(userManager.Object, outputFactory, notesManager) {
                 ControllerContext = new ControllerContext() { HttpContext = httpContext.Object },
                 ObjectValidator = MockHelper.GetObjectValidator()
             };

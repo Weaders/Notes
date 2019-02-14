@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace NotesMVC.Models {
 
@@ -21,6 +22,19 @@ namespace NotesMVC.Models {
             builder.Entity<IdentityRoleClaim<string>>().ToTable("RolesClaims");
             builder.Entity<IdentityUserRole<string>>().ToTable("UsersRoles");
             builder.Entity<IdentityUserToken<string>>().ToTable("UsersTokens");
+
+            builder.Entity<IdentityRole>().HasData(new[] {
+
+                new IdentityRole() {
+                    Name = "Admin",
+                    NormalizedName = "ADMIN"
+                },
+                new IdentityRole() {
+                    Name = "Member",
+                    NormalizedName = "MEMBER"
+                }
+
+            });
 
         }
 

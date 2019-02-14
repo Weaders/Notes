@@ -7,5 +7,10 @@
   "AllowedHosts": "*",
   "ConnectionStrings": {
     "DefaultConnection": "Server=db;Database=master;User Id=SA;Password=<password>;"
+  },
+  "UserSettings": {
+    "Login": "admin",
+    "Pwd": "qweasd123",
+    "Email": "admin@admin.com"
   }
 }
