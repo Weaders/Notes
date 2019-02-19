@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
-using NotesMVC.Models;
+using NotesMVC.Data;
 using NotesMVC.Services.Encrypter;
 
 namespace NotesMVC.Output {

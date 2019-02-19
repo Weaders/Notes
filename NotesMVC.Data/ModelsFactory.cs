@@ -1,4 +1,4 @@
-﻿namespace NotesMVC.Models {
+﻿namespace NotesMVC.Data {
 
     public class ModelsFactory: IModelsFactory {
 

@@ -1,35 +1,44 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using NotesMVC.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using NotesMVC.Data;
+using NotesMVC.DomainServices;
 using NotesMVC.Services.Encrypter;
-using NotesMVC.ViewModels;
-using System.Linq;
 using System.Threading.Tasks;
 
-namespace NotesMVC.Services {
+namespace NotesMVC.ViewModels.Validation {
+    public class NotesViewModelValidator {
 
-    public class NotesManager : INotesManager {
+        public interface IEditNoteResultValidate : IValidationResult {
+            Note NoteAfterEdit { get; set; }
+        }
+
+        public interface IDeleteNoteResulValidate : IValidationResult {
+            Note NoteForRemove { get; set; }
+        }
+
+        public interface IAddNoteResultValidate : IValidationResult {
+            Note NoteToAdd { get; set; }
+        }
 
         public class EditNoteResultValidate : ValidationResult, IEditNoteResultValidate {
-            public Note NoteForEdit { get; set; }
+            public Note NoteAfterEdit { get; set; }
         }
 
         public class DeleteNoteResulValidate : ValidationResult, IDeleteNoteResulValidate {
             public Note NoteForRemove { get; set; }
         }
 
-        public class AddNoteResultValidate : ValidationResult, IAddNoteResultValidate { }
+        public class AddNoteResultValidate : ValidationResult, IAddNoteResultValidate {
+            public Note NoteToAdd { get; set; }
+        }
 
         private readonly DefaultContext _dbContext;
         private readonly CryptographManager _cryptoMng;
         private readonly IModelsFactory _modelsFactory;
-        private readonly UserManager<User> _userMng;
 
-        public NotesManager(DefaultContext context, CryptographManager cryptoMng, IModelsFactory modelsFactory, UserManager<User> userMng) {
-            _dbContext = context;
+        public NotesViewModelValidator(DefaultContext dbCtx, CryptographManager cryptoMng, IModelsFactory modelsFactory) {
+            _dbContext = dbCtx;
             _cryptoMng = cryptoMng;
             _modelsFactory = modelsFactory;
-            _userMng = userMng;
         }
 
         /// <summary>
@@ -50,25 +59,9 @@ namespace NotesMVC.Services {
 
             }
 
+            result.NoteToAdd = noteToAdd.ToNote(_cryptoMng, userWhoAdd, _modelsFactory);
+
             return result;
-
-        }
-
-        /// <summary>
-        /// Add note
-        /// </summary>
-        /// <param name="noteToAdd"></param>
-        /// <param name="userWhoAdd"></param>
-        /// <returns></returns>
-        public async Task<Note> AddNote(NoteAdd noteToAdd, User userWhoAdd) {
-
-            var note = noteToAdd.ToNote(_cryptoMng, userWhoAdd, _modelsFactory);
-
-            _dbContext.Notes.Add(note);
-
-            await _dbContext.SaveChangesAsync();
-
-            return note;
 
         }
 
@@ -99,34 +92,12 @@ namespace NotesMVC.Services {
 
             } else {
 
-                result.NoteForEdit = note;
+                noteToEdit.EditNote(note, userWhoEdit, _cryptoMng);
+                result.NoteAfterEdit = note;
 
             }
 
             return result;
-
-        }
-
-        /// <summary>
-        /// Edit note.
-        /// </summary>
-        /// <param name="noteToEdit"></param>
-        /// <param name="noteEdit"></param>
-        /// <param name="userWhoEdit"></param>
-        /// <returns></returns>
-        public async Task<Note> EditeNote(Note noteToEdit, NoteEdit noteEdit, User userWhoEdit) {
-
-            var newNote = noteEdit.ToNote(_cryptoMng, userWhoEdit, _modelsFactory);
-
-            noteToEdit.Text = newNote.Text;
-            noteToEdit.Title = newNote.Title;
-            noteToEdit.CryptoName = newNote.CryptoName;
-
-            _dbContext.Update(noteToEdit);
-
-            await _dbContext.SaveChangesAsync();
-
-            return noteToEdit;
 
         }
 
@@ -159,33 +130,6 @@ namespace NotesMVC.Services {
             }
 
             return result;
-
-        }
-
-        /// <summary>
-        /// Remove note.
-        /// </summary>
-        /// <param name="noteForRemove"></param>
-        /// <returns></returns>
-        public async Task<Note> RemoveNote(Note noteForRemove) {
-
-            _dbContext.Notes.Remove(noteForRemove);
-            await _dbContext.SaveChangesAsync();
-
-            return noteForRemove;
-
-        }
-
-        /// <summary>
-        /// Get notes for user.
-        /// </summary>
-        /// <param name="user"></param>
-        /// <returns></returns>
-        public async Task<Note[]> NotesForUser(User user) {
-
-            return await _dbContext.Notes
-                .Where(n => n.User == user)
-                .ToArrayAsync();
 
         }
 

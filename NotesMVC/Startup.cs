@@ -6,11 +6,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using NotesMVC.Data;
+using NotesMVC.DomainServices;
 using NotesMVC.Middleware;
-using NotesMVC.Models;
 using NotesMVC.Output;
 using NotesMVC.Services;
 using NotesMVC.Services.Encrypter;
+using NotesMVC.ViewModels.Validation;
 using React.AspNet;
 using System;
 using System.Net;
@@ -39,6 +41,7 @@ namespace NotesMVC {
             });
 
             var connectionStr = this.Configuration.GetConnectionString("DefaultConnection");
+            var assemblyName = typeof(Startup).Namespace;
 
             services.AddMvc();
 
@@ -50,6 +53,9 @@ namespace NotesMVC {
             services.AddTransient<IUserService, UserService>();
             services.AddTransient<INotesManager, NotesManager>();
 
+            services.AddTransient<UserViewModelValidator>();
+            services.AddTransient<NotesViewModelValidator>();
+
             services.AddReact();
 
             services.AddIdentity<User, IdentityRole>(o => {
@@ -60,7 +66,7 @@ namespace NotesMVC {
             })
             .AddEntityFrameworkStores<DefaultContext>();
 
-            services.AddDbContext<DefaultContext>(options => options.UseSqlServer(connectionStr));
+            services.AddDbContext<DefaultContext>(options => options.UseSqlServer(connectionStr, optsBuilder => optsBuilder.MigrationsAssembly(assemblyName)));
 
             services.ConfigureApplicationCookie(opts => {
 

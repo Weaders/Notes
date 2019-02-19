@@ -1,4 +1,4 @@
-﻿using NotesMVC.Models;
+﻿using NotesMVC.Data;
 using NotesMVC.Services.Encrypter;
 using System.ComponentModel.DataAnnotations;
 

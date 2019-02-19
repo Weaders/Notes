@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using NotesMVC.Models;
+using NotesMVC.DomainServices;
 
 namespace NotesMVC.Migrations
 {
@@ -15,7 +15,7 @@ namespace NotesMVC.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.1.4-rtm-31024")
+                .HasAnnotation("ProductVersion", "2.2.2-servicing-10034")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
@@ -43,9 +43,20 @@ namespace NotesMVC.Migrations
                     b.ToTable("Roles");
 
                     b.HasData(
-                        new { Id = "403579fe-1d53-4105-b306-9e50945f93b8", ConcurrencyStamp = "f0c11efa-bd4e-48eb-994c-0a9c5ca3c1fb", Name = "Admin", NormalizedName = "ADMIN" },
-                        new { Id = "6f8d148a-03f0-4b62-85df-91e809880d00", ConcurrencyStamp = "ce0bfbf9-1859-4d19-af47-0f4e2da7f5ef", Name = "Member", NormalizedName = "MEMBER" }
-                    );
+                        new
+                        {
+                            Id = "83a84aa6-dce5-423a-96e0-3019a032d9b2",
+                            ConcurrencyStamp = "3a488523-a156-42c9-9fae-d9c635a629b2",
+                            Name = "Admin",
+                            NormalizedName = "ADMIN"
+                        },
+                        new
+                        {
+                            Id = "a0a4600a-f495-4097-b1de-1f4229afa953",
+                            ConcurrencyStamp = "8b73a8bf-32b4-429b-a957-30c7199fff9b",
+                            Name = "Member",
+                            NormalizedName = "MEMBER"
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -134,7 +145,7 @@ namespace NotesMVC.Migrations
                     b.ToTable("UsersTokens");
                 });
 
-            modelBuilder.Entity("NotesMVC.Models.Note", b =>
+            modelBuilder.Entity("NotesMVC.Data.Note", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -155,7 +166,7 @@ namespace NotesMVC.Migrations
                     b.ToTable("Notes");
                 });
 
-            modelBuilder.Entity("NotesMVC.Models.User", b =>
+            modelBuilder.Entity("NotesMVC.Data.User", b =>
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd();
@@ -218,7 +229,7 @@ namespace NotesMVC.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("NotesMVC.Models.User")
+                    b.HasOne("NotesMVC.Data.User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -226,7 +237,7 @@ namespace NotesMVC.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("NotesMVC.Models.User")
+                    b.HasOne("NotesMVC.Data.User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -239,7 +250,7 @@ namespace NotesMVC.Migrations
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("NotesMVC.Models.User")
+                    b.HasOne("NotesMVC.Data.User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -247,15 +258,15 @@ namespace NotesMVC.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("NotesMVC.Models.User")
+                    b.HasOne("NotesMVC.Data.User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("NotesMVC.Models.Note", b =>
+            modelBuilder.Entity("NotesMVC.Data.Note", b =>
                 {
-                    b.HasOne("NotesMVC.Models.User", "User")
+                    b.HasOne("NotesMVC.Data.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId");
                 });

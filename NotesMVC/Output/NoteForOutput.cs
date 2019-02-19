@@ -1,10 +1,12 @@
 ﻿using Newtonsoft.Json;
-using NotesMVC.Models;
+using NotesMVC.Data;
 using NotesMVC.Services.Encrypter;
+using System;
 using System.Text;
 
 namespace NotesMVC.Output {
 
+    [Serializable]
     public class NoteForOutput {
 
         public NoteForOutput(Note note, CryptographManager manager, string secretCode) {

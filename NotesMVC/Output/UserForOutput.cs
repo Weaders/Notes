@@ -1,5 +1,5 @@
 ﻿using Newtonsoft.Json;
-using NotesMVC.Models;
+using NotesMVC.Data;
 
 namespace NotesMVC.Output {
 

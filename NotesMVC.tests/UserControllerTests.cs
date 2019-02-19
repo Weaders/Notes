@@ -4,11 +4,14 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using NotesMVC.Controllers;
-using NotesMVC.Models;
+using NotesMVC.Data;
+using NotesMVC.DomainServices;
 using NotesMVC.Output;
 using NotesMVC.Services;
 using NotesMVC.Services.Encrypter;
 using NotesMVC.ViewModels;
+using NotesMVC.ViewModels.Validation;
+using System;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -46,7 +49,8 @@ namespace NotesMVC.tests {
             userManager.Setup(u => u.CheckPasswordAsync(It.IsAny<User>(), It.Is<string>(str => str == pwd))).Returns(Task.FromResult(true));
 
             var ctrl = this.GetUserController(users[0], userManager.Object);
-
+            var ctrlObj = ctrl.Object;
+            
             users[0].PasswordHash = pwdHash;
 
             var loginModelSuccess = new LoginModel() {
@@ -65,14 +69,10 @@ namespace NotesMVC.tests {
             };
 
             //Act
-            ctrl.TryValidateModel(loginModelSuccess);
-            var resultSuccess = await ctrl.Login(loginModelSuccess);
-
-            ctrl.TryValidateModel(loginModelWrongPwd);
-            var resultFailPwd = await ctrl.Login(loginModelWrongPwd);
-
-            ctrl.TryValidateModel(loginModelWrongName);
-            var resultFailUserName = await ctrl.Login(loginModelWrongName);
+            //ctrl.TryValidateModel(loginModelSuccess);
+            var resultSuccess = await ctrlObj.Login(loginModelSuccess);
+            var resultFailPwd = await ctrlObj.Login(loginModelWrongPwd);
+            var resultFailUserName = await ctrlObj.Login(loginModelWrongName);
 
             //Assert
             Assert.IsType<JsonResult>(resultSuccess);
@@ -113,6 +113,7 @@ namespace NotesMVC.tests {
             userManager.Setup(u => u.CreateAsync(It.IsAny<User>(), It.IsAny<string>())).Returns(Task.FromResult(IdentityResult.Success));
 
             var ctrl = this.GetUserController(null, userManager.Object);
+            var ctrlObj = ctrl.Object;
 
             var userToCreateSuccess = new RegisterModel() {
                 User = "test",
@@ -130,14 +131,11 @@ namespace NotesMVC.tests {
             };
 
             //Act
-            ctrl.TryValidateModel(userToCreateSuccess);
-            var resultSuccess = await ctrl.Register(userToCreateSuccess);
+            var resultSuccess = await ctrlObj.Register(userToCreateSuccess);
+            var resultFailExists = await ctrlObj.Register(userToCreateFailExists);
 
-            ctrl.TryValidateModel(userToCreateFailExists);
-            var resultFailExists = await ctrl.Register(userToCreateFailExists);
-
-            ctrl.TryValidateModel(userToCreateEmpty);
-            var resultFailEmpty = await ctrl.Register(userToCreateEmpty);
+            ctrlObj.TryValidateModel(userToCreateEmpty);
+            var resultFailEmpty = await ctrlObj.Register(userToCreateEmpty);
 
             //Assert
             Assert.IsType<JsonResult>(resultSuccess);
@@ -156,7 +154,7 @@ namespace NotesMVC.tests {
         /// <param name="db">Database context</param>
         /// <param name="user">User</param>
         /// <returns></returns>
-        private UserController GetUserController(User user, UserManager<User> userManager) {
+        private Mock<UserController> GetUserController(User user, UserManager<User> userManager) {
 
             var httpContext = MockHelper.GetHttpContextWithUserId(user != null ? user.Id : "");
 
@@ -164,16 +162,22 @@ namespace NotesMVC.tests {
                 new HttpContextAccessor { HttpContext = httpContext.Object },
                 new Mock<IUserClaimsPrincipalFactory<User>>().Object, null, null, null);
 
+            Func<object, JsonResult> toJson = (data) => {
+                return new JsonResult(data);
+            };
+
             var manager = new CryptographManager();
             var outputFactory = new OutputFactory(manager);
             var modelsFactory = new ModelsFactory();
-            var userService = new UserService(userManager, signInManager.Object);
+            var userService = new UserService(userManager);
+            var usersValidator = new UserViewModelValidator(userManager, new ModelsFactory());
 
-            return new UserController(signInManager.Object, userManager, outputFactory, userService) {
-                ControllerContext = new ControllerContext() { HttpContext = httpContext.Object },
-                ObjectValidator = MockHelper.GetObjectValidator()
-            };
+            var userCtrl = new Mock<UserController>(signInManager.Object, userManager, outputFactory, userService, usersValidator);
 
+            userCtrl.Object.ControllerContext = new ControllerContext() { HttpContext = httpContext.Object };
+            userCtrl.Setup(uCtrl => uCtrl.Json(It.IsAny<object>())).Returns(toJson);
+
+            return userCtrl;
 
         }
 

@@ -1,5 +1,5 @@
 ﻿using Newtonsoft.Json;
-using NotesMVC.Models;
+using NotesMVC.Data;
 using NotesMVC.Services.Encrypter;
 using System.ComponentModel.DataAnnotations;
 
@@ -27,23 +27,19 @@ namespace NotesMVC.ViewModels {
         public string AlgorithName { get; set; } = CryptographType.AES.Type;
 
         /// <summary>
-        /// Return note from current class.
+        /// Edit existed note.
         /// </summary>
-        /// <param name="manager">For get Cryptographer</param>
-        /// <param name="user">Owner of note</param>
-        /// <returns></returns>
-        public Note ToNote(CryptographManager manager, User user, IModelsFactory modelsFactory) {
+        /// <param name="noteForEdit"></param>
+        /// <param name="user"></param>
+        /// <param name="cryptoManager"></param>
+        public void EditNote(Note noteForEdit, User user, CryptographManager cryptoManager) {
 
-            var encoder = manager.Get(CryptographType.Get(AlgorithName));
+            var encoder = cryptoManager.Get(CryptographType.Get(AlgorithName));
 
-            var note = modelsFactory.CreateNote();
-
-            note.Title = encoder.Encrypt(Title, SecretKey);
-            note.Text = encoder.Encrypt(Text, SecretKey);
-            note.User = user;
-            note.CryptoName = AlgorithName;
-
-            return note;
+            noteForEdit.Text = encoder.Encrypt(Text, SecretKey);
+            noteForEdit.Title = encoder.Encrypt(Title, SecretKey);
+            noteForEdit.User = user;
+            noteForEdit.CryptoName = AlgorithName;
 
         }
 

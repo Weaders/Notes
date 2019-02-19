@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using NotesMVC.Controllers;
-using NotesMVC.Models;
+using NotesMVC.Data;
 using NotesMVC.Output;
 using NotesMVC.Services;
 using NotesMVC.Services.Encrypter;
@@ -13,6 +13,10 @@ using System.Collections.Generic;
 using System.Security.Claims;
 using Xunit;
 using System.Linq;
+using NotesMVC.DomainServices;
+using NotesMVC.ViewModels.Validation;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using System;
 
 namespace NotesMVC.tests {
 
@@ -45,7 +49,7 @@ namespace NotesMVC.tests {
 
             db.Setup(d => d.Notes).Returns(MockHelper.GetDbSet(notesData).Object);
 
-            var ctrl = this.GetNoteController(db, user);
+            var ctrl = this.GetNoteController(db, user).Object;
 
             ////Act
             var jsonResult = await ctrl.List("test") as JsonResult;
@@ -82,7 +86,7 @@ namespace NotesMVC.tests {
 
             db.Setup(d => d.Notes).Returns(MockHelper.GetDbSet(notesData).Object);
 
-            var ctrl = this.GetNoteController(db, user);
+            var ctrl = this.GetNoteController(db, user).Object;
 
             var noteAdd = new NoteAdd() {
                 SecretKey = "test",
@@ -90,18 +94,14 @@ namespace NotesMVC.tests {
                 Title = "TitleTest"
             };
 
-
             //Act
-            ctrl.TryValidateModel(noteAdd);
             var result = await ctrl.AddNote(noteAdd) as JsonResult;
-
 
             //Assert
             Assert.Null(result.StatusCode);
             Assert.IsType<NoteForOutput>(result.Value);
             Assert.Equal((result.Value as NoteForOutput).Text, noteAdd.Text);
             Assert.Equal((result.Value as NoteForOutput).Title, noteAdd.Title);
-
 
         }
 
@@ -139,9 +139,14 @@ namespace NotesMVC.tests {
                 Title = ""
             };
 
+            ctrl.Setup(ct => ct.TryValidateModel(It.IsIn(noteAdd))).Callback(() => {
+                ctrl.Object.ModelState.AddModelError("Text field empty", "Text field empty");
+                ctrl.Object.ModelState.AddModelError("Title field empty", "Title field empty");
+            });
+
             //Act
-            ctrl.TryValidateModel(noteAdd);
-            var result = await ctrl.AddNote(noteAdd);
+            ctrl.Object.TryValidateModel(noteAdd);
+            var result = await ctrl.Object.AddNote(noteAdd);
 
             //Assert
             Assert.IsType<JsonFailResult>(result);
@@ -189,6 +194,7 @@ namespace NotesMVC.tests {
             db.Setup(d => d.Notes).Returns(MockHelper.GetDbSet(notesData).Object);
 
             var ctrl = this.GetNoteController(db, user);
+            var ctrlObj = ctrl.Object;
 
             var noteEdit = new NoteEdit() {
                 SecretKey = "test",
@@ -198,8 +204,7 @@ namespace NotesMVC.tests {
             };
 
             //Act
-            ctrl.TryValidateModel(noteEdit);
-            var result = await ctrl.EditNote(noteEdit);
+            var result = await ctrlObj.EditNote(noteEdit);
 
             //Assert
             Assert.IsType<JsonResult>(result);
@@ -250,6 +255,7 @@ namespace NotesMVC.tests {
             db.Setup(d => d.Notes).Returns(MockHelper.GetDbSet(notesData).Object);
 
             var ctrl = this.GetNoteController(db, user);
+            var ctrlObj = ctrl.Object;
 
             var noteEdit = new NoteEdit() {
                 SecretKey = "test",
@@ -258,9 +264,13 @@ namespace NotesMVC.tests {
                 Id = 2
             };
 
+            ctrl.Setup(ct => ct.TryValidateModel(It.IsAny<object>())).Callback(() => {
+                ctrlObj.ModelState.AddModelError("Now onwer", "Not owner");
+            });
+
             //Act
-            ctrl.TryValidateModel(noteEdit);
-            var result = await ctrl.EditNote(noteEdit);
+            ctrlObj.TryValidateModel(noteEdit);
+            var result = await ctrlObj.EditNote(noteEdit);
 
             //Assert
             Assert.IsType<JsonFailResult>(result);
@@ -317,9 +327,19 @@ namespace NotesMVC.tests {
                 Id = 1
             };
 
+            ctrl.Setup(ct => ct.TryValidateModel(It.IsAny<object>())).Callback(() => {
+
+                ctrl.Object.ModelState.AddModelError("Secret key", "Secret key empty");
+                ctrl.Object.ModelState.AddModelError("Text", "Text empty");
+                ctrl.Object.ModelState.AddModelError("Title", "Title empty");
+
+            });
+
+            var ctrlObj = ctrl.Object;
+
             //Act
-            ctrl.TryValidateModel(noteEdit);
-            var result = await ctrl.EditNote(noteEdit);
+            ctrlObj.TryValidateModel(noteEdit);
+            var result = await ctrlObj.EditNote(noteEdit);
 
             //Assert
             Assert.IsType<JsonFailResult>(result);
@@ -367,7 +387,7 @@ namespace NotesMVC.tests {
 
             db.Setup(d => d.Notes).Returns(MockHelper.GetDbSet(notesData).Object);
 
-            var ctrl = this.GetNoteController(db, user);
+            var ctrl = this.GetNoteController(db, user).Object;
 
             //Act
             var result = await ctrl.DeleteNote(1);
@@ -417,7 +437,7 @@ namespace NotesMVC.tests {
 
             db.Setup(d => d.Notes).Returns(MockHelper.GetDbSet(notesData).Object);
 
-            var ctrl = this.GetNoteController(db, user);
+            var ctrl = this.GetNoteController(db, user).Object;
 
             //Act
             var result = await ctrl.DeleteNote(3);
@@ -468,7 +488,7 @@ namespace NotesMVC.tests {
 
             db.Setup(d => d.Notes).Returns(MockHelper.GetDbSet(notesData).Object);
 
-            var ctrl = this.GetNoteController(db, user);
+            var ctrl = this.GetNoteController(db, user).Object;
 
             //Act
             var result = await ctrl.DeleteNote(2);
@@ -487,7 +507,7 @@ namespace NotesMVC.tests {
 
         }
 
-        private NotesController GetNoteController(Mock<DefaultContext> db, User user) {
+        private Mock<NotesController> GetNoteController(Mock<DefaultContext> db, User user) {
 
             var httpContext = MockHelper.GetHttpContextWithUserId(user.Id);
             var userManager = MockHelper.GetUserManagerWithUser(db.Object);
@@ -496,18 +516,27 @@ namespace NotesMVC.tests {
 
             var signInManager = new Mock<SignInManager<User>>(userManager.Object,
                 new HttpContextAccessor { HttpContext = httpContext.Object },
-                new Mock<IUserClaimsPrincipalFactory<User>>().Object, null, null, null);
+                new Mock<IUserClaimsPrincipalFactory<User>>().Object, null, null, null
+            );
+
+            Func<object, JsonResult> toJson = (data) => {
+                return new JsonResult(data);
+            };
 
             var manager = new CryptographManager();
             var modelsFactory = new ModelsFactory();
             var outputFactory = new OutputFactory(manager);
             var notesManager = new NotesManager(db.Object, manager, modelsFactory, userManager.Object);
+            var notesValidator = new NotesViewModelValidator(db.Object, manager, modelsFactory);
 
-            return new NotesController(userManager.Object, outputFactory, notesManager) {
-                ControllerContext = new ControllerContext() { HttpContext = httpContext.Object },
-                ObjectValidator = MockHelper.GetObjectValidator()
-            };
+            var ctrlNotes = new Mock<NotesController>(userManager.Object, outputFactory, notesManager, notesValidator);
 
+            ctrlNotes.Setup(ctrl => ctrl.Json(It.IsAny<object>())).Returns(toJson);
+
+            ctrlNotes.Object.ControllerContext = new ControllerContext() { HttpContext = httpContext.Object };
+
+            return ctrlNotes;
+            
         }
     }
 }

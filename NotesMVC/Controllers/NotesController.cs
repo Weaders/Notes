@@ -1,11 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using NotesMVC.Models;
+using NotesMVC.Data;
 using NotesMVC.Output;
 using NotesMVC.Services;
-using NotesMVC.Services.Encrypter;
 using NotesMVC.ViewModels;
+using NotesMVC.ViewModels.Validation;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -16,12 +16,14 @@ namespace NotesMVC.Controllers {
         private readonly UserManager<User> _userManager;
         private readonly IOutputFactory _outputFactory;
         private readonly INotesManager _notesMng;
+        private readonly NotesViewModelValidator _notesValidator;
 
-        public NotesController(UserManager<User> userManager, IOutputFactory outputFactory, INotesManager notesMng) {
+        public NotesController(UserManager<User> userManager, IOutputFactory outputFactory, INotesManager notesMng, NotesViewModelValidator notesValidator) {
 
             _userManager = userManager;
             _outputFactory = outputFactory;
             _notesMng = notesMng;
+            _notesValidator = notesValidator;
 
         }
 
@@ -54,11 +56,11 @@ namespace NotesMVC.Controllers {
             }
 
             var user = await _userManager.GetUserAsync(User);
-            var addValid = _notesMng.ValidateAddNote(noteModel, user);
+            var addValid = _notesValidator.ValidateAddNote(noteModel, user);
 
             if (addValid.IsSuccess) {
 
-                var note = await _notesMng.AddNote(noteModel, user);
+                var note = await _notesMng.AddNote(addValid.NoteToAdd);
                 return Json(_outputFactory.CreateNote(note, noteModel.SecretKey));
 
             } else {
@@ -85,11 +87,11 @@ namespace NotesMVC.Controllers {
 
             var user = await _userManager.GetUserAsync(User);
 
-            var editValid = await _notesMng.ValidateEditNote(noteForm, user);
+            var editValid = await _notesValidator.ValidateEditNote(noteForm, user);
 
             if (editValid.IsSuccess) {
 
-                var editedNote = await _notesMng.EditeNote(editValid.NoteForEdit, noteForm, user);
+                var editedNote = await _notesMng.EditeNote(editValid.NoteAfterEdit);
                 return Json(_outputFactory.CreateNote(editedNote, noteForm.SecretKey));
 
             } else {
@@ -116,7 +118,7 @@ namespace NotesMVC.Controllers {
             }
 
             var user = await _userManager.GetUserAsync(User);
-            var delValid = await _notesMng.ValidateDeleteNote(id, user);
+            var delValid = await _notesValidator.ValidateDeleteNote(id, user);
 
             if (delValid.IsSuccess) {
 

@@ -1,15 +1,15 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using System;
+using NotesMVC.Data;
 
-namespace NotesMVC.Models {
+namespace NotesMVC.DomainServices {
 
     public class DefaultContext : IdentityDbContext<User> {
 
         public virtual DbSet<Note> Notes { get; set; }
 
-        public DefaultContext(DbContextOptions<DefaultContext> options) : base(options) {}
+        public DefaultContext(DbContextOptions<DefaultContext> options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder builder) {
 

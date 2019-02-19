@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using NotesMVC.Models;
+using NotesMVC.Data;
+using NotesMVC.DomainServices;
 using System.Linq;
 
 namespace NotesMVC.Areas.Admin.Controllers {

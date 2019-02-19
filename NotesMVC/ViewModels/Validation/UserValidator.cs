@@ -1,10 +1,25 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using NotesMVC.Models;
-using NotesMVC.ViewModels;
+using NotesMVC.Data;
 using System.Threading.Tasks;
 
-namespace NotesMVC.Services {
-    public class UserService : IUserService {
+namespace NotesMVC.ViewModels.Validation {
+    public class UserViewModelValidator {
+
+        private readonly UserManager<User> _userMng;
+        private readonly IModelsFactory _modelsFactory;
+
+        public UserViewModelValidator(UserManager<User> userMng, IModelsFactory modelsFac) {
+            _userMng = userMng;
+            _modelsFactory = modelsFac;
+        }
+
+        public interface ILoginResultValidation : IValidationResult {
+            User UserToLogin { get; set; }
+        }
+
+        public interface IRegisterResultValidation : IValidationResult {
+            User UserToRegister { get; set; }
+        }
 
         public class LoginResultValidation : ValidationResult, ILoginResultValidation {
             public User UserToLogin { get; set; }
@@ -12,16 +27,6 @@ namespace NotesMVC.Services {
 
         public class RegisterResultValidation : ValidationResult, IRegisterResultValidation {
             public User UserToRegister { get; set; }
-        }
-
-        private readonly UserManager<User> _userMng;
-        private readonly SignInManager<User> _signInMng;
-
-        public UserService(UserManager<User> userMng, SignInManager<User> signInMng) {
-
-            _userMng = userMng;
-            _signInMng = signInMng;
-
         }
 
         /// <summary>
@@ -56,15 +61,6 @@ namespace NotesMVC.Services {
         }
 
         /// <summary>
-        /// Login to user
-        /// </summary>
-        /// <param name="user"></param>
-        /// <returns></returns>
-        public Task Login(User user) {
-            return _signInMng.SignInAsync(user, true);
-        }
-
-        /// <summary>
         /// Register validate
         /// </summary>
         /// <param name="registerModel"></param>
@@ -80,31 +76,14 @@ namespace NotesMVC.Services {
                 result.IsSuccess = false;
                 result.Errors.Add("User already exists", "User already exists");
 
+            } else {
+
+                result.UserToRegister = _modelsFactory.CreateUser();
+                result.UserToRegister.UserName = registerModel.User;
+
             }
 
             return result;
-
-        }
-
-        /// <summary>
-        /// Register new user.
-        /// </summary>
-        /// <param name="registerModel"></param>
-        /// <param name="userToReg"></param>
-        /// <returns></returns>
-        public async Task<User> Register(RegisterModel registerModel) {
-
-            var user = new User() {
-                UserName = registerModel.User
-            };
-
-            var userCreate = await _userMng.CreateAsync(user, registerModel.Password);
-
-            if (userCreate.Succeeded) {
-                return user;
-            }
-
-            return null;
 
         }
 
