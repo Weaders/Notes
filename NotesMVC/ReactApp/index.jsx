@@ -15,10 +15,16 @@ import UserApp from './containers/UserApp';
 
 import authRouteMiddleware from './middleware/authRoute';
 
+const middlewares = [
+  authRouteMiddleware, thunkMiddleware,
+];
 
-const logger = createLogger();
+if (NODE_ENV !== 'production') {
+  const logger = createLogger();
+  middlewares.push(logger);
+}
 
-const store = createStore(reducers, applyMiddleware(authRouteMiddleware, thunkMiddleware, logger));
+const store = createStore(reducers, applyMiddleware(...middlewares));
 
 render(
   <Provider store={store}>

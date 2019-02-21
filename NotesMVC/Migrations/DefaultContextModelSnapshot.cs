@@ -45,15 +45,15 @@ namespace NotesMVC.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "83a84aa6-dce5-423a-96e0-3019a032d9b2",
-                            ConcurrencyStamp = "3a488523-a156-42c9-9fae-d9c635a629b2",
+                            Id = "17bc6c64-89e6-4b53-9e01-0eba74c593ab",
+                            ConcurrencyStamp = "41fca685-6ecd-48bb-bafd-7d2436930254",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "a0a4600a-f495-4097-b1de-1f4229afa953",
-                            ConcurrencyStamp = "8b73a8bf-32b4-429b-a957-30c7199fff9b",
+                            Id = "68783339-3398-4ed6-a8a7-b116a89d0d29",
+                            ConcurrencyStamp = "8793a735-273f-44e3-a240-9ad8144a8d03",
                             Name = "Member",
                             NormalizedName = "MEMBER"
                         });

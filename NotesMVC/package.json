@@ -3,12 +3,14 @@
   "name": "asp.net",
   "private": true,
   "scripts": {
-    "build": "webpack --mode development",
+    "buildDev": "webpack --mode development",
+    "buildProd": "webpack --mode production",
     "jsCheck": "eslint ReactApp --ext .js --ext .jsx",
     "jsFix": "eslint ReactApp --ext .js --ext .jsx --fix"
   },
   "devDependencies": {
     "babel-eslint": "^10.0.1",
+    "cross-env": "^5.2.0",
     "eslint": "^5.13.0",
     "eslint-config-airbnb": "^17.1.0",
     "eslint-plugin-import": "^2.16.0",

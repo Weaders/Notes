@@ -70,6 +70,7 @@ namespace NotesMVC.Controllers {
                 if (result.IsSuccess) {
 
                     var userCreated = await _usersService.Register(result.UserToRegister, model.Password);
+                    await _signInManager.SignInAsync(userCreated, true);
                     return Json(_outputFactory.CreateUser(userCreated));
 
                 } else {

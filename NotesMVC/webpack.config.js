@@ -1,19 +1,28 @@
 ﻿'use strict';
 
 const path = require('path');
-
+const webpack = require('webpack');
 const bundleFolder = "./wwwroot/assets/";
 
-module.exports = {
-    mode: 'development',
+module.exports = (_, argv = { mode: 'development' }) => ({
+    mode: argv.mode,
     entry: [
         "./ReactApp/index.jsx"
     ],
-    devtool: "source-map",
+    devtool: (argv.mode === 'production' ? false : "source-map"),
     output: {
         filename: "bundle.js",
         publicPath: 'assets/',
         path: path.resolve(__dirname, bundleFolder)
+    },
+    plugins: [
+        new webpack.DefinePlugin({
+            NODE_ENV: JSON.stringify(argv.mode || 'development')
+        })
+    ],
+    performance: {
+        maxEntrypointSize: 512000,
+        maxAssetSize: 512000
     },
     module: {
         rules: [
@@ -27,5 +36,5 @@ module.exports = {
             }
         ]
     },
-    resolve: { extensions: [ '.js', '.jsx'] },
-};
+    resolve: { extensions: ['.js', '.jsx'] },
+});

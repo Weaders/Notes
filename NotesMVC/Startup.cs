@@ -96,11 +96,13 @@ namespace NotesMVC {
 
                 app.UseDeveloperExceptionPage();
                 app.UseWebpackDevMiddleware();
+                logger.LogInformation("Run in dev mode");
 
             } else {
 
-                app.UseExceptionHandler("/Home/Error");
+                app.UseExceptionHandler("/NotThere");
                 app.UseHsts();
+                logger.LogInformation("Run in prod mode");
 
             }
 
@@ -119,11 +121,6 @@ namespace NotesMVC {
                 routes.MapRoute(
                     name: "default",
                     template: "{controller=User}/{action=LoginForm}"
-                );
-
-                routes.MapRoute(
-                    name: "areas",
-                    template: "{area:exists}/{controller}/{action}"
                 );
 
             });
@@ -147,7 +144,10 @@ namespace NotesMVC {
                 var userCreate = await userMng.CreateAsync(userData, userCnfgSection["Pwd"]);
 
                 if (userCreate.Succeeded) {
+
                     await userMng.AddToRoleAsync(userData, "Admin");
+                    logger.LogInformation("User success created.");
+
                 } else {
                     logger.LogWarning("Can not create default user");
                 }

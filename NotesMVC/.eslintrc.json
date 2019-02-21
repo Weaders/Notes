@@ -8,6 +8,7 @@
         "browser": true
     },
     "globals": {
-        "$": false
+        "$": false,
+        "NODE_ENV": false
     }
 }
